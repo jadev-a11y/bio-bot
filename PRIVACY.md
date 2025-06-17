@@ -1,0 +1,1 @@
+This bot collects only basic Telegram user data (username, messages) to provide personalized responses. No data is stored permanently or shared with third parties. All interactions are processed in real-time for bot functionality only.
