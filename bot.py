@@ -33,7 +33,6 @@ translations = {
 • Telegram bots that actually work
 • And pretty much anything tech-related!
 
-💬 **Fun fact:** I can start a conversation about literally anything and keep it going - try me! 😄
 
 **Choose what you'd like to know about me:**""",
         'ru': """🌟 **Добро пожаловать {name} в мою личную вселенную!** 🌟
@@ -46,7 +45,6 @@ translations = {
 • Telegram боты, которые реально работают
 • И практически всё, что связано с технологиями!
 
-💬 **Интересный факт:** Я могу начать разговор о чём угодно и поддержать его - попробуйте! 😄
 
 **Выберите, что вы хотели бы узнать обо мне:**""",
         'uz': """🌟 **Xush kelibsiz {name} mening shaxsiy olamimga!** 🌟
@@ -59,7 +57,6 @@ translations = {
 • Haqiqatan ishlaydigantelegram botlar
 • Va texnologiya bilan bog'liq deyarli hamma narsa!
 
-💬 **Qiziq fakt:** Men har qanday mavzu haqida suhbat boshlashim va uni davom ettirishim mumkin - sinab ko'ring! 😄
 
 **Men haqimda nimani bilishni xohlaysiz, tanlang:**"""
     },
