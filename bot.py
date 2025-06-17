@@ -2,10 +2,40 @@ import os
 import telebot
 from telebot import types
 import logging
+from threading import Thread
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+class HealthHandler(BaseHTTPRequestHandler):
+    """Простой HTTP обработчик для health check"""
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        
+        response = """
+        <!DOCTYPE html>
+        <html>
+        <head><title>Bio Bot Status</title></head>
+        <body>
+            <h1>🤖 Bio Bot is Running!</h1>
+            <p>✅ Telegram Bot is active and responding</p>
+            <p>🚀 Deployed on Render</p>
+            <p>📡 Connect via Telegram: @your_bot_username</p>
+        </body>
+        </html>
+        """
+        self.wfile.write(response.encode())
+
+def keep_alive():
+    """HTTP сервер для Render health check"""
+    port = int(os.environ.get('PORT', 8000))
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    logger.info(f"🌐 HTTP server starting on port {port}")
+    server.serve_forever()
 
 # Токен бота
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
@@ -414,6 +444,12 @@ What would you like to know about me?
 
 if __name__ == "__main__":
     try:
+        # Запускаем HTTP сервер в отдельном потоке
+        http_thread = Thread(target=keep_alive)
+        http_thread.daemon = True
+        http_thread.start()
+        
+        # Запускаем Telegram бота
         logger.info("🤖 Bot is starting...")
         bot.polling(none_stop=True)
     except Exception as e:
