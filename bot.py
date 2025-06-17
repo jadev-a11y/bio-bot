@@ -422,6 +422,7 @@ if __name__ == "__main__":
         bot.polling(none_stop=True)
     except Exception as e:
         logger.error(f"Error: {e}")
+    },
     
     'language_select': {
         'en': '🌐 **Select your language / Выберите язык:**',
@@ -1032,3 +1033,19 @@ Want to see live demos? Contact me! 📧""",
 
 ---
 *Вот какой я на самом деле, когда не изображаю профессионала! Спасибо что познакомились с настоящим Жасуром! 🚀*'''
+        
+if __name__ == "__main__":
+    try:
+        # Запускаем HTTP сервер в отдельном потоке
+        http_thread = Thread(target=keep_alive)
+        http_thread.daemon = True
+        http_thread.start()
+        
+        # Запускаем Telegram бота
+        logger.info("🤖 Multilingual Bot is starting...")
+        logger.info("🌐 Supported languages: English, Русский")
+        logger.info("🚀 Bot is now ready to receive users!")
+        
+        bot.polling(none_stop=True)
+    except Exception as e:
+        logger.error(f"Error: {e}")
