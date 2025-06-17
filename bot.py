@@ -1,23 +1,90 @@
+К сожалению, я не могу прикреплять файлы, но вот **полный готовый код** - просто скопируйте всё и вставьте в ваш `bot.py`:
+
+```python
 import os
 import telebot
 from telebot import types
 import logging
 from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import json
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Хранилище для языков пользователей (в реальном боте используйте базу данных)
+class HealthHandler(BaseHTTPRequestHandler):
+    """Простой HTTP обработчик для health check"""
+    def do_GET(self):
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.end_headers()
+            
+            response = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Level Up Developer Bot</title>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a1a1a; color: white; }
+                    h1 { color: #00d4aa; }
+                </style>
+            </head>
+            <body>
+                <h1>🎮 Level Up Developer Bot is Running!</h1>
+                <p>✅ Telegram Bot is active and responding</p>
+                <p>🚀 Deployed on Render</p>
+                <p>📡 Find me in Telegram: @rjr.biobot</p>
+                <p>⚡ Status: Online 24/7</p>
+                <p>🌐 Languages: English, Русский</p>
+            </body>
+            </html>
+            """
+            self.wfile.write(response.encode('utf-8'))
+        except Exception as e:
+            logger.error(f"HTTP handler error: {e}")
+    
+    def do_HEAD(self):
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+        except Exception as e:
+            logger.error(f"HTTP HEAD error: {e}")
+    
+    def log_message(self, format, *args):
+        return
+
+def keep_alive():
+    """HTTP сервер для Render health check"""
+    try:
+        port = int(os.environ.get('PORT', 8000))
+        server = HTTPServer(('0.0.0.0', port), HealthHandler)
+        logger.info(f"🌐 HTTP server starting on port {port}")
+        server.serve_forever()
+    except Exception as e:
+        logger.error(f"HTTP server error: {e}")
+
+# Токен бота
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+
+if not BOT_TOKEN:
+    logger.error("BOT_TOKEN not found!")
+    exit(1)
+
+# Создаем бота
+bot = telebot.TeleBot(BOT_TOKEN)
+
+# Хранилище для языков пользователей и попыток паролей
 user_languages = {}
+user_password_attempts = {}
+SECRET_PASSWORD = "lchn18"
 
 # Языковые настройки
 LANGUAGES = {
     'en': '🇬🇧 English',
-    'ru': '🇷🇺 Русский', 
-    'uz': '🇺🇿 O\'zbek'
+    'ru': '🇷🇺 Русский'
 }
 
 # Переводы
@@ -33,6 +100,8 @@ translations = {
 • Telegram bots that actually work
 • And pretty much anything tech-related!
 
+💬 **Fun fact:** I can start a conversation about literally anything and keep it going - try me! 😄
+
 **Choose what you'd like to know about me:**""",
         'ru': """🌟 **Добро пожаловать {name} в мою личную вселенную!** 🌟
 
@@ -44,30 +113,19 @@ translations = {
 • Telegram боты, которые реально работают
 • И практически всё, что связано с технологиями!
 
-**Выберите, что вы хотели бы узнать обо мне:**""",
-        'uz': """🌟 **Xush kelibsiz {name} mening shaxsiy olamimga!** 🌟
+💬 **Интересный факт:** Я могу начать разговор о чём угодно и поддержать его - попробуйте! 😄
 
-👋 Salom! Men **Markaziy Osiyodan 15 yoshli texnologiya ishqibozi**man va haqiqatan ham muhim bo'lgan raqamli tajribalarni yaratishdan zavqlanaman.
-
-🚀 **Men nima qilaman:**
-• To'liq web-ishlab chiqish (Frontend + Backend)
-• Har qanday didga mos maxsus veb-saytlar
-• Haqiqatan ishlaydigantelegram botlar
-• Va texnologiya bilan bog'liq deyarli hamma narsa!
-
-**Men haqimda nimani bilishni xohlaysiz, tanlang:**"""
+**Выберите, что вы хотели бы узнать обо мне:**"""
     },
     
     'language_select': {
-        'en': '🌐 **Select your language / Выберите язык / Tilni tanlang:**',
-        'ru': '🌐 **Select your language / Выберите язык / Tilni tanlang:**',
-        'uz': '🌐 **Select your language / Выберите язык / Tilni tanlang:**'
+        'en': '🌐 **Select your language / Выберите язык:**',
+        'ru': '🌐 **Select your language / Выберите язык:**'
     },
     
     'language_changed': {
         'en': '✅ Language changed to English!',
-        'ru': '✅ Язык изменен на русский!',
-        'uz': '✅ Til o\'zbek tiliga o\'zgartirildi!'
+        'ru': '✅ Язык изменен на русский!'
     },
     
     'help_text': {
@@ -86,6 +144,7 @@ Use the buttons to explore different sections:
 📧 **Contact** - How to reach me
 🌍 **Languages** - Multilingual capabilities
 🎯 **Interests** - My hobbies and passions
+🔒 **Personal Information** - Private details (password protected)
 
 **💡 Pro Tips:**
 • Each section has detailed information
@@ -110,6 +169,7 @@ I love talking to people and discussing new ideas! 🚀""",
 📧 **Контакты** - Как со мной связаться
 🌍 **Языки** - Многоязычные возможности
 🎯 **Интересы** - Мои хобби и увлечения
+🔒 **Личная информация** - Приватные детали (защищено паролем)
 
 **💡 Полезные советы:**
 • В каждом разделе есть подробная информация
@@ -118,31 +178,7 @@ I love talking to people and discussing new ideas! 🚀""",
 • Я отвечаю на все сообщения лично!
 
 **Есть вопросы? Просто спрашивайте!** 
-Я люблю общаться с людьми и обсуждать новые идеи! 🚀""",
-        'uz': """❓ **Ushbu botdan qanday foydalanish**
-
-**Mavjud buyruqlar:**
-• `/start` - Asosiy menyu va salomlashish
-• `/help` - Ushbu yordam xabari
-• `/lang` - Tilni o'zgartirish
-
-**Interaktiv menyu:**
-Turli bo'limlarni o'rganish uchun tugmalardan foydalaning:
-👤 **Men haqimda** - Mening to'liq hikoyam va biografiyam
-💻 **Ko'nikmalar** - Texnik qobiliyatlar va vositalar
-🚀 **Loyihalar** - Portfolio va yutuqlar
-📧 **Aloqa** - Men bilan qanday bog'lanish
-🌍 **Tillar** - Ko'p tilli imkoniyatlar
-🎯 **Qiziqishlar** - Mening sevimli mashg'ulotlarim
-
-**💡 Foydali maslahatlar:**
-• Har bir bo'limda batafsil ma'lumot bor
-• Qulay navigatsiya uchun "Menyuga qaytish" tugmasini ishlating
-• Aniq savollar bilan to'g'ridan-to'g'ri murojaat qiling
-• Men barcha xabarlarga shaxsan javob beraman!
-
-**Savollar bormi? Shunchaki so'rang!** 
-Men odamlar bilan suhbatlashishni va yangi g'oyalarni muhokama qilishni yaxshi ko'raman! 🚀"""
+Я люблю общаться с людьми и обсуждать новые идеи! 🚀"""
     },
     
     'about_me': {
@@ -187,28 +223,7 @@ Ready to see what I can do? Check out my skills and projects! 🚀""",
 **Философия:**
 "Возраст - это просто число, когда у тебя есть страсть и преданность. Мне может быть 15, но мой код говорит громче моего свидетельства о рождении!" 💪
 
-Готовы увидеть, что я умею? Загляните в мои навыки и проекты! 🚀""",
-        'uz': """👨‍💻 **Men haqimda - To'liq hikoya**
-
-🎂 **Yosh:** 15 yosh (ha, men ertaroq boshladim!)
-🌍 **Joylashuv:** Markaziy Osiyo
-🎯 **Missiya:** Raqamli kelajakni qurish, har bir loyiha bilan
-
-**Mening yo'lim:**
-🚀 Veb-saytlar qanday ishlashiga qiziqib dasturlashni boshladim
-💡 Tezda frontend go'zalligi VA backend mantiqini ham yaxshi ko'rishimni angladim
-🌟 Endi odamlar haqiqattan ham foydalanishni yoqtiradigan full-stack yechimlar yarataman
-
-**Meni noyob qiladigan narsa:**
-✨ Men chinakam HAMMA NARSAGA ishtiyoqliman - texnologiya, madaniyat, fan, nima bo'lmasin
-🗣️ Suhbat ustasi - kvant fizikasi yoki sevimli pizza haqida bir xil ishtiyoq bilan gaplasha olaman
-🔧 Tabiatim bo'yicha muammo yechuvchi - agar biror narsa mavjud bo'lsa, uni qanday yaxshilashni tushunib olishim mumkin
-🌈 Markaziy Osiyodan turlicha nuqtai nazar har bir loyihaga yangi g'oyalar olib keladi
-
-**Falsafa:**
-"Ishtiyoq va fidoiylik bor joyda yosh shunchaki raqam. Men 15 yoshda bo'lishim mumkin, lekin mening kodim tug'ilganlik guvohnomamdan balandroq gapiradi!" 💪
-
-Men nima qila olishimni ko'rishga tayyormisiz? Ko'nikmalarim va loyihalarimni ko'ring! 🚀"""
+Готовы увидеть, что я умею? Загляните в мои навыки и проекты! 🚀"""
     },
     
     'skills': {
@@ -241,7 +256,7 @@ Men nima qila olishimni ko'rishga tayyormisiz? Ko'nikmalarim va loyihalarimni ko
 🌐 Netlify, Heroku, Railway
 
 **Soft Skills:**
-🗣️ Excellent Communication (3 languages!)
+🗣️ Excellent Communication (2 languages!)
 🧠 Quick Learner & Problem Solver
 🤝 Team Collaboration
 💡 Creative Thinking
@@ -281,7 +296,7 @@ Men nima qila olishimni ko'rishga tayyormisiz? Ko'nikmalarim va loyihalarimni ko
 🌐 Netlify, Heroku, Railway
 
 **Мягкие навыки:**
-🗣️ Отличное общение (3 языка!)
+🗣️ Отличное общение (2 языка!)
 🧠 Быстрое обучение и решение проблем
 🤝 Командная работа
 💡 Творческое мышление
@@ -291,47 +306,7 @@ Men nima qila olishimni ko'rishga tayyormisiz? Ko'nikmalarim va loyihalarimni ko
 🔮 Основы машинного обучения
 🎮 Разработка игр с Unity
 
-**Интересный факт:** Я изучаю новые технологии быстрее, чем большинство людей изучают новые игры! 🎯""",
-        'uz': """💻 **Mening texnik arsenalim**
-
-**Frontend ishlab chiqish:**
-🎨 HTML5, CSS3, JavaScript (ES6+)
-⚡ React.js, Vue.js
-🎯 Moslashuvchan dizayn va Mobile-First
-✨ CSS animatsiyalari va o'zaro ta'sirlar
-🖼️ UI/UX dizayn tamoyillari
-
-**Backend ishlab chiqish:**
-🐍 Python (Django, Flask)
-🟢 Node.js, Express.js
-🗄️ Ma'lumotlar bazasi dizayni (SQL, NoSQL)
-🔐 API ishlab chiqish va xavfsizlik
-☁️ Bulut xizmatlari va joylashtirish
-
-**Bot ishlab chiqish:**
-🤖 Telegram Bot API mutaxassisi
-⚙️ Murakkab mantiq va avtomatlashtirish
-💬 Tabiiy suhbat oqimi
-📊 Ma'lumotlarni qayta ishlash va tahlil
-
-**Vositalar va texnologiyalar:**
-🛠️ Git, GitHub, VS Code
-🚀 Docker, Linux
-📱 Figma, Adobe Creative Suite
-🌐 Netlify, Heroku, Railway
-
-**Yumshoq ko'nikmalar:**
-🗣️ Ajoyib muloqot (3 til!)
-🧠 Tez o'rganish va muammo yechish
-🤝 Jamoa hamkorligi
-💡 Ijodiy fikrlash
-
-**Hozir o'rganyapman:**
-📚 React'ning ilg'or namunalari
-🔮 Mashinali o'rganishning asoslari
-🎮 Unity bilan o'yin ishlab chiqish
-
-**Qiziq fakt:** Men yangi texnologiyalarni ko'pchilik yangi o'yinlarni o'rganishidan tezroq o'rganaman! 🎯"""
+**Интересный факт:** Я изучаю новые технологии быстрее, чем большинство людей изучают новые игры! 🎯"""
     },
     
     'projects': {
@@ -430,55 +405,7 @@ Want to see live demos? Contact me! 📧""",
 
 **Философия:** "Каждый проект - это шанс создать что-то удивительное и изучить что-то новое!" ✨
 
-Хотите увидеть живые демо? Свяжитесь со мной! 📧""",
-        'uz': """🚀 **Mening loyihalar ko'rgazmasi**
-
-**🌟 Tanlangan loyihalar:**
-
-**1. 🌌 Kosmik portfolio veb-sayt**
-• Kosmik mavzudagi chiroyli shaxsiy veb-sayt
-• Maxsus CSS animatsiyalari va zarracha effektlari
-• To'liq moslashuvchan dizayn
-• Texnologiya: HTML5, CSS3, JavaScript
-• *Status: Dasturchilar hamjamiyatlarida taqdim etilgan*
-
-**2. 🤖 AI bilan ishlaydigan Telegram botlar**
-• Ilg'or suhbat mantiqiga ega bir nechta botlar
-• Foydalanuvchi tahlili va ma'lumotlarni qayta ishlash
-• Maxsus admin panellari
-• Texnologiya: Python, PostgreSQL, Docker
-• *1000+ faol foydalanuvchi tomonidan ishlatilmoqda*
-
-**3. 💼 Biznes landing sahifalari**
-• Mahalliy biznes uchun maxsus veb-saytlar
-• SEO optimallashtirish va ishlash sozlamalari
-• Kontent boshqaruv tizimlari
-• Texnologiya: React.js, Node.js, MongoDB
-• *100% mijozlar mamnuniyat darajasi*
-
-**4. 🎮 Interaktiv veb-o'yinlar**
-• Real vaqt funksiyalari bilan brauzer asosidagi o'yinlar
-• Ko'p foydalanuvchili funksiyalar
-• Progressive Web App imkoniyatlari
-• Texnologiya: JavaScript, WebSockets, Canvas API
-
-**5. 📱 Mobile-First veb-ilovalar**
-• Mahalliy his qiladigan moslashuvchan ilovalar
-• Service workers bilan oflayn funksiyalar
-• Push bildirishnomalar integratsiyasi
-• Texnologiya: Vue.js, PWA texnologiyalari
-
-**🔥 Siz uchun nima qura olaman:**
-• E-commerce platformalar
-• Ijtimoiy tarmoq ilovalari
-• Ta'lim platformalari
-• O'yin veb-saytlari
-• Biznes avtomatlashtirish vositalari
-• Va siz tasavvur qila oladigan har qanday narsa!
-
-**Falsafa:** "Har bir loyiha - ajoyib narsa yaratish va yangi narsalarni o'rganish imkoniyati!" ✨
-
-Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
+Хотите увидеть живые демо? Свяжитесь со мной! 📧"""
     },
     
     'contact': {
@@ -561,47 +488,7 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 
 **Веселый вызов:** Напишите мне свою самую дикую идею проекта - держу пари, я смогу понять, как это осуществить! 🚀
 
-*"Отличные идеи заслуживают отличного исполнения. Давайте воплотим это в жизнь!"* ✨""",
-        'uz': """📧 **Keling bog'lanaliq va ajoyib narsa yarataylik!**
-
-**To'g'ridan-to'g'ri aloqa:**
-📩 **Email:** orbitskill@gmail.com
-💬 **Telegram:** @oxygw
-🐙 **GitHub:** github.com/jadev-a11y
-
-**💼 Quyidagilar uchun mavjudman:**
-✅ Maxsus veb-sayt ishlab chiqish
-✅ Telegram bot yaratish
-✅ Full-Stack veb-ilovalar
-✅ UI/UX dizayn va maslahat
-✅ Kod ko'rib chiqish va mentorlik
-✅ Texnik muhokamalar va aqliy hujum
-
-**🕒 Javob berish vaqti:**
-• Odatda 2-4 soat ichida
-• Shoshilinch loyihalar: 30 daqiqa ichida
-• Vaqt zonasi: UTC+5 (Markaziy Osiyo)
-
-**💰 Hamkorlik:**
-• Talabalar uchun qulay narxlar
-• Portfolio loyihalari (ba'zan qiziqarli g'oyalar uchun bepul!)
-• Uzoq muddatli hamkorlik mavjud
-• Har doim innovatsion qiyinchiliklarga tayyor
-
-**🎯 Men uchun mukammal loyihalar:**
-• MVP ishlab chiqishga muhtoj startaplar
-• Veb-ishlab chiqishni o'rganayotgan talabalar
-• Raqamli texnologiyaga o'tayotgan kichik biznes
-• Noyob talablarga ega ijodiy loyihalar
-
-**📞 Men bilan qanday bog'lanish:**
-1. **Tezkor savollar:** Telegram (eng tez javob)
-2. **Biznes so'rovlari:** Email (batafsil takliflar)
-3. **Kod hamkorligi:** GitHub (birga quraylik!)
-
-**Qiziqarli qiyinchilik:** Menga eng aqldan ozgan loyiha g'oyangizni yozing - ishonchim komilki, uni qanday amalga oshirishni tushunib olaman! 🚀
-
-*"Ajoyib g'oyalar ajoyib bajarilishni loyiq ko'radi. Keling, buni amalga oshiraylik!"* ✨"""
+*"Отличные идеи заслуживают отличного исполнения. Давайте воплотим это в жизнь!"* ✨"""
     },
     
     'languages': {
@@ -621,14 +508,8 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Cultural nuances understanding
 • *Perfect for CIS market projects*
 
-**🇺🇿 O'zbek** - Native
-• Deep cultural understanding
-• Local market insights
-• Regional business knowledge
-• *Bridge between Central Asian cultures*
-
 **💡 Communication Superpowers:**
-✨ Can explain technical concepts in any of these languages
+✨ Can explain technical concepts in both languages
 🌐 Perfect for international teams
 🤝 Cultural sensitivity in global projects
 📚 Translate technical documentation
@@ -640,7 +521,7 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Culturally appropriate solutions
 • Effective team communication
 
-**Fun Fact:** I dream in code, but I debug in three languages! 😄
+**Fun Fact:** I dream in code, but I debug in two languages! 😄
 
 **Bonus:** I'm also learning:
 🇰🇷 Korean (K-pop influence! 🎵)
@@ -661,14 +542,8 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Понимание культурных нюансов
 • *Идеально для проектов рынка СНГ*
 
-**🇺🇿 O'zbek** - Родной
-• Глубокое понимание культуры
-• Понимание местного рынка
-• Региональные бизнес-знания
-• *Мост между центральноазиатскими культурами*
-
 **💡 Суперспособности общения:**
-✨ Могу объяснить технические концепции на любом из этих языков
+✨ Могу объяснить технические концепции на обоих языках
 🌐 Идеально для международных команд
 🤝 Культурная чувствительность в глобальных проектах
 📚 Перевожу техническую документацию
@@ -680,51 +555,11 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Культурно подходящие решения
 • Эффективное командное общение
 
-**Интересный факт:** Я мечтаю в коде, но отлаживаю на трех языках! 😄
+**Интересный факт:** Я мечтаю в коде, но отлаживаю на двух языках! 😄
 
 **Бонус:** Я также изучаю:
 🇰🇷 Корейский (влияние K-pop! 🎵)
-🇯🇵 Японский (Аниме и технологическая культура)""",
-        'uz': """🌍 **Ko'p tilli muloqot**
-
-**🗣️ Men gapira oladigan tillar:**
-
-**🇺🇸 English** - Erkin
-• Professional muloqot
-• Texnik hujjatlar
-• Xalqaro loyiha hamkorligi
-• *Murakkab tushunchalarni oddiy tarzda tushuntira olaman*
-
-**🇷🇺 Русский** - Ona tili
-• Texnik atamalar bilan qulay
-• Biznes muloqoti
-• Madaniy nozikliklarni tushunish
-• *MDH bozori loyihalari uchun mukammal*
-
-**🇺🇿 O'zbek** - Ona tili
-• Madaniyatni chuqur tushunish
-• Mahalliy bozor tushunchalari
-• Mintaqaviy biznes bilimlari
-• *Markaziy Osiyo madaniyatlari o'rtasidagi ko'prik*
-
-**💡 Muloqot super kuchlari:**
-✨ Ushbu tillarning har qandayida texnik tushunchalarni tushuntira olaman
-🌐 Xalqaro jamoalar uchun mukammal
-🤝 Global loyihalarda madaniy sezgirlik
-📚 Texnik hujjatlarni tarjima qilaman
-🎯 Muloqot uslubini auditoriyaga moslashtiraman
-
-**🚀 Bu sizning loyihangiz uchun nimani anglatadi:**
-• Ishlab chiqishda til to'siqlari yo'q
-• Turli foydalanuvchilar ehtiyojlarini yaxshiroq tushunish
-• Madaniy jihatdan mos yechimlar
-• Samarali jamoa muloqoti
-
-**Qiziq fakt:** Men kod bilan tush ko'raman, lekin uch tilda debug qilaman! 😄
-
-**Bonus:** Men shuningdek o'rganyapman:
-🇰🇷 Koreys tili (K-pop ta'siri! 🎵)
-🇯🇵 Yapon tili (Anime va texnologiya madaniyati)"""
+🇯🇵 Японский (Аниме и технологическая культура)"""
     },
     
     'interests': {
@@ -773,8 +608,7 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Can turn any boring topic into an interesting conversation
 
 **🚀 My Philosophy:**
-"Life is too short to be bored. There's always something fascinating to discover, create, or improve!\"""",
-
+"Life is too short to be bored. There's always something fascinating to discover, create, or improve!" ✨""",
         'ru': """🎯 **Моя вселенная интересов**
 
 **🔧 Технологии и инновации:**
@@ -803,7 +637,7 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Технические подкасты и YouTube каналы
 • Вклад в open source
 • Хакатоны и соревнования по программированию
-• Обучение других тому, что знаю
+• Обучение других тому что знаю 
 
 **🌍 Глобальная перспектива:**
 • Разные культуры и традиции
@@ -820,55 +654,94 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 • Могу превратить любую скучную тему в интересный разговор
 
 **🚀 Моя философия:**
-"Жизнь слишком коротка, чтобы скучать. Всегда есть что-то увлекательное для открытия, создания или улучшения!"\"""",
+"Жизнь слишком коротка, чтобы скучать. Всегда есть что-то увлекательное для открытия, создания или улучшения!" ✨"""
+    },
+    
+    'personal_info_content': {
+        'en': '''🔓 **Personal Information - Access Granted**
 
-        'uz': """🎯 **Mening qiziqishlar olami**
+👋 **The Real Me:**
+• Name: Jasur, 15 years old, Tashkent
+• Location: Yangikhayat district (but I'm cool with people from anywhere!)
+• Born: November 18, 2010 🎂
 
-**🔧 Texnologiya va innovatsiya:**
-• Eng so'nggi gadjetlar va texnologik trendlar
-• AI va mashinali o'rganish ishlanmalari
-• Blokcheyn va kriptovalyuta
-• IoT va aqlli uy avtomatizatsiyasi
-• Kosmik texnologiya va tadqiqotlar
+😊 **My Personality:**
+• I'm a unique person - want to be sad? Let's go! Want to have fun? Let's go! Want to cringe? Let's go! Want to be serious? Let's go!
+• I can talk about absolutely anything - just don't reply to my long texts with "okay" 😁
+• I can adapt to your communication style, matching status or avatar - no problem! 🥹
+• I'm a terrible socialphobe 🫣 but somehow still love meeting new people
 
-**🎮 Raqamli madaniyat:**
-• Video o'yin ishlab chiqish va dizayn
-• Streaming texnologiyalari
-• Raqamli san'at va NFT
-• Virtual va qo'shimcha haqiqat
-• Kiberxavfsizlik va axloqiy hacking
+🎵 **My Daily Life:**
+• Music 24/7 - always in headphones 🎧
+• Always online on Telegram, if not - I'll still see the notification and reply instantly
+• I'm the person who responds in split seconds ⚡
+• Love trying everything new, I'm into almost everything
+• Love growing flames on TikTok 🥰
 
-**🌟 Ijodiy mashg'ulotlar:**
-• UI/UX dizayn tendentsiyalari
-• Raqamli fotografiya
-• Video montaj va harakat grafikalari
-• Musiqa ishlab chiqarish (elektron bitlar!)
-• 3D modellashtirish va animatsiya
+☕ **My Favorites:**
+• Tea with lemon and coffee are my life! ☕🍋
+• I love staying up all night - sleep is overrated 🌙
+• Listening to music at night hits different 🎶
+• Reading books late at night is my therapy 📚
 
-**🧠 O'rganish va o'sish:**
-• Onlayn kurslar va sertifikatlar
-• Texnik podkastlar va YouTube kanallari
-• Open source hissalar
-• Xakatonlar va dasturlash musobaqalari
-• Boshqalarga bilganimni o'rgatish
+💭 **My Vibe:**
+• Generally comfortable and cheerful person
+• But when needed, we can be sad together 🥲
+• I can start a conversation on any topic
+• Love deep night conversations over tea
 
-**🌍 Global nuqtai nazar:**
-• Turli madaniyatlar va an'analar
-• Xalqaro biznes amaliyotlari
-• Til o'rganish usullari
-• Sayohat va geografiya
-• Global iqtisodiy tendentsiyalar
+---
+*This is who I really am when I'm not being all professional! Thanks for getting to know the real Jasur! 🚀*''',
 
-**⚡ Men haqimda tasodifiy faktlar:**
-• Deyarli har qanday texnik muammoni yecha olaman (do'stlar meni "Texnik yordam" deb atashadi)
-• Kvant fizikasidan tortib pitsa afzalliklarigacha hamma narsani muhokama qilishni yaxshi ko'raman
-• Har doim yangi qiyinchiliklar va o'rganish imkoniyatlaridan hayajonlanaman
-• Ishtiyoq bor joyda yoshning shunchaki raqam ekanligiga ishonaman
-• Har qanday zerikarli mavzuni qiziqarli suhbatga aylantira olaman
+        'ru': '''🔓 **Личная информация - Доступ разрешен**
 
-**🚀 Mening falsafam:**
-"Hayot zerikish uchun juda qisqa. Har doim kashf qilish, yaratish yoki yaxshilash uchun qiziqarli narsa bor!"\"""",
+👋 **Настоящий я:**
+• Имя: Жасур, 15 лет, Ташкент
+• Район: Янгихайятский (но мне все равно откуда вы, главное чтобы было о чем поговорить!)
+• Родился: 18 ноября 2010 года 🎂
 
+😊 **Моя личность:**
+• Я уникальный человек - погрустить? Го! Повеселиться? Го! Покринжовать? Го! Быть серьёзными? Го!
+• Со мной можно поговорить о чём только можно - главное не отвечайте на большой текст «понятно» 😁
+• Могу подстроиться под ваш стиль общения, парный статус или аватарка - без проблем! 🥹
+• Я жуткий социофоб 🫣 но почему-то все равно люблю знакомиться
+
+🎵 **Моя повседневность:**
+• Музыка 24/7 - постоянно в наушниках 🎧
+• Онлайн в телеграмме всегда, если нет то все равно увижу уведомление и сразу отвечу
+• Я человек который отвечает за долю секунды ⚡
+• Обожаю пробовать все новое, шарю почти за все
+• Растить огонёк в тиктоке - обожаю 🥰
+
+☕ **Мои любимые вещи:**
+• Чай с лимоном и кофе - моя жизнь! ☕🍋
+• Обожаю не спать по ночам - сон переоценен 🌙
+• Слушать музыку по ночам - это особое настроение 🎶
+• Читать книги поздно ночью - моя терапия 📚
+
+💭 **Мой характер:**
+• Вообще я комфортный и жизнерадостный
+• Но когда надо можем и погрустить 🥲
+• Умею заводить разговор на любые темы
+• Люблю глубокие ночные разговоры за чаем
+
+---
+*Вот какой я на самом деле, когда не изображаю профессионала! Спасибо что познакомились с настоящим Жасуром! 🚀*'''
+    },
+    
+    'password_prompt': {
+        'en': '🔐 **Access to Personal Information**\n\nThis section contains private details about my real personality, hobbies, and personal life beyond the professional side.\n\n🔑 **Please enter the access code to continue:**\n\n💡 *Hint: Special combination from my personal life*',
+        'ru': '🔐 **Доступ к личной информации**\n\nЭтот раздел содержит личные детали о моей настоящей личности, хобби и личной жизни за пределами профессиональной стороны.\n\n🔑 **Пожалуйста, введите код доступа для продолжения:**\n\n💡 *Подсказка: Особая комбинация из моей личной жизни*'
+    },
+    
+    'wrong_password': {
+        'en': '❌ **Access Denied**\n\n🚫 Incorrect access code. Please try again.\n\n💡 *Hint: Think about something very personal to me*\n\n🔄 **Attempts remaining: {attempts}**',
+        'ru': '❌ **Доступ запрещен**\n\n🚫 Неверный код доступа. Попробуйте еще раз.\n\n💡 *Подсказка: Подумайте о чем-то очень личном для меня*\n\n🔄 **Осталось попыток: {attempts}**'
+    },
+    
+    'access_blocked': {
+        'en': '🚨 **Access Temporarily Blocked**\n\n⏰ Too many incorrect attempts. Access to personal information is temporarily restricted.\n\n🔄 **Try again later or contact me directly.**',
+        'ru': '🚨 **Доступ временно заблокирован**\n\n⏰ Слишком много неверных попыток. Доступ к личной информации временно ограничен.\n\n🔄 **Попробуйте позже или свяжитесь со мной напрямую.**'
     },
     
     'message_reply': {
@@ -885,26 +758,17 @@ What would you like to know about me?""",
 
 Используйте /start чтобы увидеть главное меню со всей информацией обо мне, или просто продолжайте общаться - я люблю говорить о технологиях, проектах или буквально о чём угодно! 🚀
 
-Что вы хотели бы узнать обо мне?""",
-        'uz': """Xabar uchun rahmat! 😊
-
-Men Markaziy Osiyodan 15 yoshli dasturchiman va ajoyib raqamli tajribalar yaratishni yaxshi ko'raman!
-
-Barcha ma'lumotlarim bilan asosiy menyuni ko'rish uchun /start dan foydalaning yoki shunchaki suhbatni davom ettiring - men texnologiya, loyihalar yoki deyarli har qanday narsa haqida gaplashishni yaxshi ko'raman! 🚀
-
-Men haqimda nimani bilishni xohlaysiz?"""
+Что вы хотели бы узнать обо мне?"""
     },
     
     'back_to_menu': {
         'en': '🔙 Back to Menu',
-        'ru': '🔙 Назад в меню',
-        'uz': '🔙 Menyuga qaytish'
+        'ru': '🔙 Назад в меню'
     },
     
     'change_lang': {
         'en': '🌐 Change Language',
-        'ru': '🌐 Изменить язык', 
-        'uz': '🌐 Tilni o\'zgartirish'
+        'ru': '🌐 Изменить язык'
     }
 }
 
@@ -912,99 +776,33 @@ Men haqimda nimani bilishni xohlaysiz?"""
 menu_buttons = {
     'about': {
         'en': '👤 About Me',
-        'ru': '👤 Обо мне',
-        'uz': '👤 Men haqimda'
+        'ru': '👤 Обо мне'
     },
     'skills': {
         'en': '💻 Skills',
-        'ru': '💻 Навыки',
-        'uz': '💻 Ko\'nikmalar'
+        'ru': '💻 Навыки'
     },
     'projects': {
         'en': '🚀 Projects',
-        'ru': '🚀 Проекты',
-        'uz': '🚀 Loyihalar'
+        'ru': '🚀 Проекты'
     },
     'contact': {
         'en': '📧 Contact',
-        'ru': '📧 Контакты',
-        'uz': '📧 Aloqa'
+        'ru': '📧 Контакты'
     },
     'languages': {
         'en': '🌍 Languages',
-        'ru': '🌍 Языки',
-        'uz': '🌍 Tillar'
+        'ru': '🌍 Языки'
     },
     'interests': {
         'en': '🎯 Interests',
-        'ru': '🎯 Интересы',
-        'uz': '🎯 Qiziqishlar'
+        'ru': '🎯 Интересы'
+    },
+    'personal_info': {
+        'en': '🔒 Personal Information',
+        'ru': '🔒 Личная информация'
     }
 }
-
-class HealthHandler(BaseHTTPRequestHandler):
-    """Простой HTTP обработчик для health check"""
-    def do_GET(self):
-        try:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html; charset=utf-8')
-            self.end_headers()
-            
-            response = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Level Up Developer Bot</title>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a1a1a; color: white; }
-                    h1 { color: #00d4aa; }
-                </style>
-            </head>
-            <body>
-                <h1>🎮 Level Up Developer Bot is Running!</h1>
-                <p>✅ Telegram Bot is active and responding</p>
-                <p>🚀 Deployed on Render</p>
-                <p>📡 Find me in Telegram: @rjr.biobot</p>
-                <p>⚡ Status: Online 24/7</p>
-                <p>🌐 Languages: English, Русский, O'zbek</p>
-            </body>
-            </html>
-            """
-            self.wfile.write(response.encode('utf-8'))
-        except Exception as e:
-            logger.error(f"HTTP handler error: {e}")
-    
-    def do_HEAD(self):
-        try:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-        except Exception as e:
-            logger.error(f"HTTP HEAD error: {e}")
-    
-    def log_message(self, format, *args):
-        return
-
-def keep_alive():
-    """HTTP сервер для Render health check"""
-    try:
-        port = int(os.environ.get('PORT', 8000))
-        server = HTTPServer(('0.0.0.0', port), HealthHandler)
-        logger.info(f"🌐 HTTP server starting on port {port}")
-        server.serve_forever()
-    except Exception as e:
-        logger.error(f"HTTP server error: {e}")
-
-# Токен бота
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
-
-if not BOT_TOKEN:
-    logger.error("BOT_TOKEN not found!")
-    exit(1)
-
-# Создаем бота
-bot = telebot.TeleBot(BOT_TOKEN)
 
 def get_user_language(user_id):
     """Получить язык пользователя"""
@@ -1041,10 +839,12 @@ def create_main_menu(user_id):
     btn4 = types.InlineKeyboardButton(menu_buttons['contact'][lang], callback_data="contact")
     btn5 = types.InlineKeyboardButton(menu_buttons['languages'][lang], callback_data="languages")
     btn6 = types.InlineKeyboardButton(menu_buttons['interests'][lang], callback_data="interests")
+    btn7 = types.InlineKeyboardButton(menu_buttons['personal_info'][lang], callback_data="personal_info")
     
     markup.add(btn1, btn2)
     markup.add(btn3, btn4)
     markup.add(btn5, btn6)
+    markup.add(btn7)
     
     # Добавляем кнопку смены языка
     lang_btn = types.InlineKeyboardButton(t('change_lang', user_id), callback_data="change_lang")
@@ -1090,9 +890,6 @@ def lang_command(message):
     markup = create_language_menu()
     bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
 
-# Исправленный обработчик callback'ов
-# Замените эту часть в вашем коде:
-
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     """Обработчик нажатий на кнопки"""
@@ -1128,9 +925,29 @@ def callback_handler(call):
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
                              reply_markup=markup, parse_mode='Markdown')
     
-    # ИСПРАВЛЕННАЯ ЧАСТЬ - обработка основных разделов
+    # Секретный раздел
+    elif call.data == "personal_info":
+        # Инициализируем попытки пользователя
+        if user_id not in user_password_attempts:
+            user_password_attempts[user_id] = 3
+        
+        if user_password_attempts[user_id] <= 0:
+            text = t('access_blocked', user_id)
+            markup = create_back_menu(user_id)
+            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                                 reply_markup=markup, parse_mode='Markdown')
+        else:
+            text = t('password_prompt', user_id)
+            markup = create_back_menu(user_id)
+            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                                 reply_markup=markup, parse_mode='Markdown')
+            
+            # Устанавливаем состояние ожидания пароля
+            user_languages[user_id + 1000000] = 'waiting_password'
+    
+    # Обработка основных разделов
     elif call.data == "about":
-        text = t('about_me', user_id)  # Изменено с 'about' на 'about_me'
+        text = t('about_me', user_id)
         markup = create_back_menu(user_id)
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
                              reply_markup=markup, parse_mode='Markdown')
@@ -1152,14 +969,8 @@ def callback_handler(call):
         markup = create_back_menu(user_id)
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
                              reply_markup=markup, parse_mode='Markdown')
-    
-    elif call.data == "languages":
-        text = t('languages', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    
-    elif call.data == "interests":
+
+elif call.data == "interests":
         text = t('interests', user_id)
         markup = create_back_menu(user_id)
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
@@ -1167,13 +978,40 @@ def callback_handler(call):
     
     # Подтверждение обработки callback
     bot.answer_callback_query(call.id)
-    # Подтверждение обработки callback
-    bot.answer_callback_query(call.id)
 
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     """Обработчик всех остальных сообщений"""
     user_id = message.from_user.id
+    
+    # Проверяем, ждем ли мы пароль от пользователя
+    if user_languages.get(user_id + 1000000) == 'waiting_password':
+        user_languages.pop(user_id + 1000000, None)  # Убираем состояние
+        
+        if message.text == SECRET_PASSWORD:
+            # Правильный пароль!
+            text = t('personal_info_content', user_id)
+            markup = create_back_menu(user_id)
+            bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+            
+            # Сбрасываем попытки
+            user_password_attempts[user_id] = 3
+        else:
+            # Неправильный пароль
+            user_password_attempts[user_id] -= 1
+            attempts_left = user_password_attempts[user_id]
+            
+            if attempts_left > 0:
+                text = t('wrong_password', user_id, attempts=attempts_left)
+                markup = create_back_menu(user_id)
+                bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+            else:
+                text = t('access_blocked', user_id)
+                markup = create_back_menu(user_id)
+                bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+        return
+    
+    # Обычная обработка сообщений
     text = t('message_reply', user_id)
     bot.send_message(message.chat.id, text, parse_mode='Markdown')
 
@@ -1186,7 +1024,9 @@ if __name__ == "__main__":
         
         # Запускаем Telegram бота
         logger.info("🤖 Multilingual Bot is starting...")
-        logger.info("🌐 Supported languages: English, Русский, O'zbek")
+        logger.info("🌐 Supported languages: English, Русский")
+        logger.info("🚀 Bot is now ready to receive users!")
+        
         bot.polling(none_stop=True)
     except Exception as e:
         logger.error(f"Error: {e}")
