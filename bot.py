@@ -1,11 +1,14 @@
 import os
 import logging
-from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
-# Загружаем переменные из .env файла (для локальной разработки)
-load_dotenv()
+# Загружаем переменные среды
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv не обязательно в продакшене
 
 # Настройка логирования
 logging.basicConfig(
