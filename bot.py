@@ -1,10 +1,9 @@
 import os
-import telegram
-from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import telebot
+from telebot import types
 import logging
 
-# Логирование
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -15,67 +14,140 @@ if not BOT_TOKEN:
     logger.error("BOT_TOKEN not found!")
     exit(1)
 
-def start(update, context):
-    """Команда /start"""
-    user = update.effective_user
-    
-    message = f"""
-🌟 **Welcome {user.first_name}!** 🌟
+# Создаем бота
+bot = telebot.TeleBot(BOT_TOKEN)
 
-👋 Hi! I'm a **15-year-old tech enthusiast** from Central Asia passionate about creating digital experiences!
+def create_main_menu():
+    """Создает главное меню с кнопками"""
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    
+    btn1 = types.InlineKeyboardButton("👤 About Me", callback_data="about")
+    btn2 = types.InlineKeyboardButton("💻 Skills", callback_data="skills")
+    btn3 = types.InlineKeyboardButton("🚀 Projects", callback_data="projects")
+    btn4 = types.InlineKeyboardButton("📧 Contact", callback_data="contact")
+    btn5 = types.InlineKeyboardButton("🌍 Languages", callback_data="languages")
+    btn6 = types.InlineKeyboardButton("🎯 Interests", callback_data="interests")
+    
+    markup.add(btn1, btn2)
+    markup.add(btn3, btn4)
+    markup.add(btn5, btn6)
+    
+    return markup
+
+def create_back_menu():
+    """Создает кнопку Назад"""
+    markup = types.InlineKeyboardMarkup()
+    back_btn = types.InlineKeyboardButton("🔙 Back to Menu", callback_data="menu")
+    markup.add(back_btn)
+    return markup
+
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    """Команда /start"""
+    user_name = message.from_user.first_name or "Friend"
+    
+    text = f"""
+🌟 **Welcome {user_name} to my personal universe!** 🌟
+
+👋 Hi there! I'm a **15-year-old tech enthusiast** from Central Asia who's passionate about creating digital experiences that matter.
 
 🚀 **What I do:**
 • Full-stack web development (Frontend + Backend)
-• Custom websites for any taste
+• Custom websites tailored to any taste
 • Telegram bots that actually work
-• Anything tech-related!
+• And pretty much anything tech-related!
 
-**Available commands:**
-/about - Learn more about me
-/skills - My technical skills
-/projects - Check out my work
-/contact - Get in touch
-/languages - Languages I speak
-/interests - My hobbies
+💬 **Fun fact:** I can start a conversation about literally anything and keep it going - try me! 😄
 
-💬 **Fun fact:** I can talk about literally anything - try me! 😄
-
-Type any command or just chat with me! 🚀
+**Choose what you'd like to know about me:**
     """
     
-    update.message.reply_text(message, parse_mode='Markdown')
+    markup = create_main_menu()
+    bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
 
-def about(update, context):
-    """Команда /about"""
-    message = """
+@bot.message_handler(commands=['help'])
+def help_command(message):
+    """Команда /help"""
+    text = """
+❓ **How to Navigate This Bot**
+
+**Available Commands:**
+• `/start` - Main menu and welcome
+• `/help` - This help message
+
+**Interactive Menu:**
+Use the buttons to explore different sections:
+👤 **About Me** - My full story and background
+💻 **Skills** - Technical abilities and tools
+🚀 **Projects** - Portfolio and achievements
+📧 **Contact** - How to reach me
+🌍 **Languages** - Multilingual capabilities
+🎯 **Interests** - My hobbies and passions
+
+**💡 Pro Tips:**
+• Each section has detailed information
+• Use "Back to Menu" to navigate easily
+• Contact me directly for specific questions
+• I respond to all messages personally!
+
+**🤖 Bot Features:**
+✅ Always up-to-date information
+✅ Mobile-friendly interface
+✅ Quick navigation
+✅ Personal touch in every response
+
+**Questions? Just ask!** 
+I love talking to people and discussing new ideas! 🚀
+    """
+    
+    bot.send_message(message.chat.id, text, parse_mode='Markdown')
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    """Обработчик нажатий на кнопки"""
+    
+    if call.data == "menu":
+        text = """
+🌟 **Welcome back to my personal universe!** 🌟
+
+👋 I'm a **15-year-old tech enthusiast** from Central Asia who's passionate about creating digital experiences that matter.
+
+**Choose what you'd like to know about me:**
+        """
+        markup = create_main_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "about":
+        text = """
 👨‍💻 **About Me - The Full Story**
 
-🎂 **Age:** 15 years old (started early!)
+🎂 **Age:** 15 years old (yeah, I started early!)
 🌍 **Location:** Central Asia 
 🎯 **Mission:** Building the digital future, one project at a time
 
 **My Journey:**
-🚀 Started coding out of curiosity about how websites work
-💡 Love both frontend beauty AND backend logic
-🌟 Create full-stack solutions people actually enjoy using
+🚀 Started coding because I was curious about how websites work
+💡 Quickly realized I love both frontend beauty AND backend logic
+🌟 Now I create full-stack solutions that people actually enjoy using
 
 **What makes me unique:**
-✨ Passionate about EVERYTHING - tech, culture, science
-🗣️ Master conversationalist - can discuss anything with enthusiasm  
-🔧 Natural problem solver - can improve almost anything
-🌈 Central Asian perspective brings fresh ideas
+✨ I'm genuinely passionate about EVERYTHING - tech, culture, science, you name it
+🗣️ Master conversationalist - I can discuss quantum physics or favorite pizza toppings with equal enthusiasm
+🔧 Problem solver by nature - if it exists, I can probably figure out how to improve it
+🌈 Diverse perspective from Central Asia brings fresh ideas to every project
 
 **Philosophy:**
-"Age is just a number when you have passion and dedication. My code speaks louder than my birth certificate!" 💪
+"Age is just a number when you have passion and dedication. I might be 15, but my code speaks louder than my birth certificate!" 💪
 
-Ready to see what I can do? Use /skills and /projects! 🚀
-    """
+Ready to see what I can do? Check out my skills and projects! 🚀
+        """
+        markup = create_back_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
     
-    update.message.reply_text(message, parse_mode='Markdown')
-
-def skills(update, context):
-    """Команда /skills"""
-    message = """
+    elif call.data == "skills":
+        text = """
 💻 **My Technical Arsenal**
 
 **Frontend Development:**
@@ -83,22 +155,25 @@ def skills(update, context):
 ⚡ React.js, Vue.js
 🎯 Responsive Design & Mobile-First
 ✨ CSS Animations & Interactions
+🖼️ UI/UX Design Principles
 
 **Backend Development:**
 🐍 Python (Django, Flask)
 🟢 Node.js, Express.js
 🗄️ Database Design (SQL, NoSQL)
 🔐 API Development & Security
+☁️ Cloud Services & Deployment
 
 **Bot Development:**
 🤖 Telegram Bot API Expert
 ⚙️ Complex Logic & Automation
 💬 Natural Conversation Flow
+📊 Data Processing & Analytics
 
 **Tools & Technologies:**
 🛠️ Git, GitHub, VS Code
 🚀 Docker, Linux
-📱 Figma, Design Tools
+📱 Figma, Adobe Creative Suite
 🌐 Netlify, Heroku, Railway
 
 **Soft Skills:**
@@ -110,66 +185,71 @@ def skills(update, context):
 **Currently Learning:**
 📚 Advanced React Patterns
 🔮 Machine Learning Basics
-🎮 Game Development
+🎮 Game Development with Unity
 
 **Fun Fact:** I learn new technologies faster than most people learn new games! 🎯
-    """
+        """
+        markup = create_back_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
     
-    update.message.reply_text(message, parse_mode='Markdown')
-
-def projects(update, context):
-    """Команда /projects"""
-    message = """
+    elif call.data == "projects":
+        text = """
 🚀 **My Project Showcase**
 
 **🌟 Featured Projects:**
 
 **1. 🌌 Cosmic Portfolio Website**
-• Space-themed personal website
+• Beautiful space-themed personal website
 • Custom CSS animations & particle effects
 • Fully responsive design
 • Tech: HTML5, CSS3, JavaScript
+• *Status: Featured on developer communities*
 
 **2. 🤖 AI-Powered Telegram Bots**
-• Advanced conversation logic
+• Multiple bots with advanced conversation logic
 • User analytics & data processing
+• Custom admin panels
 • Tech: Python, PostgreSQL, Docker
 • *Used by 1000+ active users*
 
 **3. 💼 Business Landing Pages**
 • Custom websites for local businesses
 • SEO optimization & performance tuning
+• Content management systems
 • Tech: React.js, Node.js, MongoDB
 • *100% client satisfaction rate*
 
 **4. 🎮 Interactive Web Games**
 • Browser-based games with real-time features
 • Multiplayer functionality
+• Progressive Web App capabilities
 • Tech: JavaScript, WebSockets, Canvas API
 
 **5. 📱 Mobile-First Web Apps**
 • Responsive applications that feel native
 • Offline functionality with service workers
+• Push notifications integration
 • Tech: Vue.js, PWA technologies
 
-**🔥 What I Can Build:**
+**🔥 What I Can Build for You:**
 • E-commerce platforms
 • Social media applications
 • Educational platforms
 • Gaming websites
 • Business automation tools
-• Literally anything you can imagine!
+• And literally anything you can imagine!
 
-**Philosophy:** "Every project is a chance to create something amazing!" ✨
+**Philosophy:** "Every project is a chance to create something amazing and learn something new!" ✨
 
-Want to see live demos? Use /contact! 📧
-    """
+Want to see live demos? Contact me! 📧
+        """
+        markup = create_back_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
     
-    update.message.reply_text(message, parse_mode='Markdown')
-
-def contact(update, context):
-    """Команда /contact"""
-    message = """
+    elif call.data == "contact":
+        text = """
 📧 **Let's Connect & Build Something Amazing!**
 
 **Direct Contact:**
@@ -192,7 +272,7 @@ def contact(update, context):
 
 **💰 Collaboration:**
 • Student-friendly rates
-• Portfolio projects (sometimes free for cool ideas!)
+• Portfolio projects (sometimes free for interesting ideas!)
 • Long-term partnerships available
 • Always up for innovative challenges
 
@@ -203,20 +283,20 @@ def contact(update, context):
 • Creative projects with unique requirements
 
 **📞 How to Reach Me:**
-1. **Quick Questions:** Telegram (fastest)
+1. **Quick Questions:** Telegram (fastest response)
 2. **Business Inquiries:** Email (detailed proposals)
 3. **Code Collaboration:** GitHub (let's build together!)
 
-**Fun Challenge:** Message me your wildest project idea - I bet I can make it happen! 🚀
+**Fun Challenge:** Message me with your wildest project idea - I bet I can figure out how to make it happen! 🚀
 
 *"Great ideas deserve great execution. Let's make it happen!"* ✨
-    """
+        """
+        markup = create_back_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
     
-    update.message.reply_text(message, parse_mode='Markdown')
-
-def languages(update, context):
-    """Команда /languages"""
-    message = """
+    elif call.data == "languages":
+        text = """
 🌍 **Multilingual Communication**
 
 **🗣️ Languages I Speak:**
@@ -240,30 +320,30 @@ def languages(update, context):
 • *Bridge between Central Asian cultures*
 
 **💡 Communication Superpowers:**
-✨ Explain technical concepts in any language
+✨ Can explain technical concepts in any of these languages
 🌐 Perfect for international teams
 🤝 Cultural sensitivity in global projects
 📚 Translate technical documentation
 🎯 Adapt communication style to audience
 
-**🚀 What This Means for Projects:**
+**🚀 What This Means for Your Project:**
 • No language barriers in development
 • Better understanding of diverse user needs
 • Culturally appropriate solutions
 • Effective team communication
 
-**Fun Fact:** I dream in code, but debug in three languages! 😄
+**Fun Fact:** I dream in code, but I debug in three languages! 😄
 
-**Bonus Learning:**
+**Bonus:** I'm also learning:
 🇰🇷 Korean (K-pop influence! 🎵)
 🇯🇵 Japanese (Anime and tech culture)
-    """
+        """
+        markup = create_back_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
     
-    update.message.reply_text(message, parse_mode='Markdown')
-
-def interests(update, context):
-    """Команда /interests"""
-    message = """
+    elif call.data == "interests":
+        text = """
 🎯 **My Universe of Interests**
 
 **🔧 Technology & Innovation:**
@@ -302,102 +382,39 @@ def interests(update, context):
 • Global economic trends
 
 **⚡ Random Facts About Me:**
-• Friends call me "Tech Support" - I fix everything!
-• Love discussing quantum physics to pizza preferences
-• Always excited about new challenges
-• Believe age is just a number with passion
-• Can make any topic interesting
+• I can fix almost any tech problem (friends call me "Tech Support")
+• Love discussing everything from quantum physics to pizza preferences
+• Always excited about new challenges and learning opportunities
+• Believe that age is just a number when you have passion
+• Can turn any boring topic into an interesting conversation
 
-**🚀 Philosophy:**
-"Life's too short to be bored. There's always something fascinating to discover, create, or improve!"
+**🚀 My Philosophy:**
+"Life is too short to be bored. There's always something fascinating to discover, create, or improve!"
 
 **Challenge:** Try to name a topic I can't discuss - I dare you! 😄
-    """
-    
-    update.message.reply_text(message, parse_mode='Markdown')
+        """
+        markup = create_back_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
 
-def help_command(update, context):
-    """Команда /help"""
-    message = """
-❓ **Bot Commands & Features**
-
-**Available Commands:**
-• `/start` - Welcome message & introduction
-• `/about` - My full story and background
-• `/skills` - Technical abilities and tools
-• `/projects` - Portfolio and achievements
-• `/contact` - How to reach me
-• `/languages` - Multilingual capabilities
-• `/interests` - My hobbies and passions
-• `/help` - This help message
-
-**💡 Pro Tips:**
-• Each command gives detailed information
-• You can also just chat with me normally!
-• Contact me directly for specific questions
-• I respond to all messages personally
-
-**🤖 Bot Features:**
-✅ Always up-to-date information
-✅ Mobile-friendly interface
-✅ Personal touch in every response
-✅ Works 24/7
-
-**Questions? Just ask!** 
-I love talking to people and discussing new ideas! 🚀
-
-Type any command or just start chatting! 💬
-    """
-    
-    update.message.reply_text(message, parse_mode='Markdown')
-
-def echo(update, context):
-    """Отвечает на любые сообщения"""
-    message = f"""
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    """Обработчик всех остальных сообщений"""
+    text = f"""
 Thanks for the message! 😊
 
 I'm a 15-year-old developer from Central Asia who loves creating amazing digital experiences!
 
-**Try these commands to learn more:**
-• /about - My story
-• /skills - What I can do
-• /projects - My work
-• /contact - Get in touch
-
-Or just keep chatting - I love talking about tech, projects, or literally anything! 🚀
+Use /start to see the main menu with all my information, or just keep chatting - I love talking about tech, projects, or literally anything! 🚀
 
 What would you like to know about me?
     """
     
-    update.message.reply_text(message, parse_mode='Markdown')
+    bot.send_message(message.chat.id, text, parse_mode='Markdown')
 
-def main():
-    """Запуск бота"""
+if __name__ == "__main__":
     try:
-        # Создаем updater
-        updater = Updater(BOT_TOKEN, use_context=True)
-        dp = updater.dispatcher
-        
-        # Добавляем обработчики команд
-        dp.add_handler(CommandHandler("start", start))
-        dp.add_handler(CommandHandler("about", about))
-        dp.add_handler(CommandHandler("skills", skills))
-        dp.add_handler(CommandHandler("projects", projects))
-        dp.add_handler(CommandHandler("contact", contact))
-        dp.add_handler(CommandHandler("languages", languages))
-        dp.add_handler(CommandHandler("interests", interests))
-        dp.add_handler(CommandHandler("help", help_command))
-        
-        # Обработчик всех остальных сообщений
-        dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
-        
-        # Запускаем бота
         logger.info("🤖 Bot is starting...")
-        updater.start_polling()
-        updater.idle()
-        
+        bot.polling(none_stop=True)
     except Exception as e:
-        logger.error(f"Error starting bot: {e}")
-
-if __name__ == '__main__':
-    main()
+        logger.error(f"Error: {e}")
