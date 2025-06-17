@@ -12,30 +12,57 @@ logger = logging.getLogger(__name__)
 class HealthHandler(BaseHTTPRequestHandler):
     """Простой HTTP обработчик для health check"""
     def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        
-        response = """
-        <!DOCTYPE html>
-        <html>
-        <head><title>Bio Bot Status</title></head>
-        <body>
-            <h1>🤖 Bio Bot is Running!</h1>
-            <p>✅ Telegram Bot is active and responding</p>
-            <p>🚀 Deployed on Render</p>
-            <p>📡 Connect via Telegram: @your_bot_username</p>
-        </body>
-        </html>
-        """
-        self.wfile.write(response.encode())
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.end_headers()
+            
+            response = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Level Up Developer Bot</title>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a1a1a; color: white; }
+                    h1 { color: #00d4aa; }
+                </style>
+            </head>
+            <body>
+                <h1>🎮 Level Up Developer Bot is Running!</h1>
+                <p>✅ Telegram Bot is active and responding</p>
+                <p>🚀 Deployed on Render</p>
+                <p>📡 Find me in Telegram: @rjr.biobot</p>
+                <p>⚡ Status: Online 24/7</p>
+            </body>
+            </html>
+            """
+            self.wfile.write(response.encode('utf-8'))
+        except Exception as e:
+            logger.error(f"HTTP handler error: {e}")
+    
+    def do_HEAD(self):
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+        except Exception as e:
+            logger.error(f"HTTP HEAD error: {e}")
+    
+    def log_message(self, format, *args):
+        # Отключаем стандартные HTTP логи
+        return
 
 def keep_alive():
     """HTTP сервер для Render health check"""
-    port = int(os.environ.get('PORT', 8000))
-    server = HTTPServer(('0.0.0.0', port), HealthHandler)
-    logger.info(f"🌐 HTTP server starting on port {port}")
-    server.serve_forever()
+    try:
+        port = int(os.environ.get('PORT', 8000))
+        server = HTTPServer(('0.0.0.0', port), HealthHandler)
+        logger.info(f"🌐 HTTP server starting on port {port}")
+        server.serve_forever()
+    except Exception as e:
+        logger.error(f"HTTP server error: {e}")
+        # Если HTTP сервер не запустится, бот все равно будет работать
 
 # Токен бота
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
