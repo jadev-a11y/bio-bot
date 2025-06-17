@@ -1,94 +1,81 @@
 import os
+import telegram
+from telegram import Bot, Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
-# Загружаем переменные среды
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass  # dotenv не обязательно в продакшене
+# Логирование
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Настройка логирования
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-
-# Токен бота (берется из переменной окружения)
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+# Токен бота
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
 if not BOT_TOKEN:
-    print("❌ Error: BOT_TOKEN environment variable not set!")
-    print("Set it in your hosting platform (Render/Railway) settings")
+    logger.error("BOT_TOKEN not found!")
     exit(1)
 
-def start(update: Update, context: CallbackContext):
-    """Стартовое сообщение с главным меню"""
-    keyboard = [
-        [InlineKeyboardButton("👤 About Me", callback_data='about'),
-         InlineKeyboardButton("💻 Skills", callback_data='skills')],
-        [InlineKeyboardButton("🚀 Projects", callback_data='projects'),
-         InlineKeyboardButton("📧 Contact", callback_data='contact')],
-        [InlineKeyboardButton("🌍 Languages", callback_data='languages'),
-         InlineKeyboardButton("🎯 Interests", callback_data='interests')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+def start(update, context):
+    """Команда /start"""
+    user = update.effective_user
     
-    welcome_text = """
-🌟 **Welcome to my personal universe!** 🌟
+    message = f"""
+🌟 **Welcome {user.first_name}!** 🌟
 
-👋 Hi there! I'm a **15-year-old tech enthusiast** from Central Asia who's passionate about creating digital experiences that matter.
+👋 Hi! I'm a **15-year-old tech enthusiast** from Central Asia passionate about creating digital experiences!
 
 🚀 **What I do:**
 • Full-stack web development (Frontend + Backend)
-• Custom websites tailored to any taste
+• Custom websites for any taste
 • Telegram bots that actually work
-• And pretty much anything tech-related!
+• Anything tech-related!
 
-💬 **Fun fact:** I can start a conversation about literally anything and keep it going - try me! 😄
+**Available commands:**
+/about - Learn more about me
+/skills - My technical skills
+/projects - Check out my work
+/contact - Get in touch
+/languages - Languages I speak
+/interests - My hobbies
 
-**Choose what you'd like to know about me:**
+💬 **Fun fact:** I can talk about literally anything - try me! 😄
+
+Type any command or just chat with me! 🚀
     """
     
-    update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def about(update: Update, context: CallbackContext):
-    """Подробная информация обо мне"""
-    about_text = """
+def about(update, context):
+    """Команда /about"""
+    message = """
 👨‍💻 **About Me - The Full Story**
 
-🎂 **Age:** 15 years old (yeah, I started early!)
+🎂 **Age:** 15 years old (started early!)
 🌍 **Location:** Central Asia 
 🎯 **Mission:** Building the digital future, one project at a time
 
 **My Journey:**
-🚀 Started coding because I was curious about how websites work
-💡 Quickly realized I love both frontend beauty AND backend logic
-🌟 Now I create full-stack solutions that people actually enjoy using
+🚀 Started coding out of curiosity about how websites work
+💡 Love both frontend beauty AND backend logic
+🌟 Create full-stack solutions people actually enjoy using
 
 **What makes me unique:**
-✨ I'm genuinely passionate about EVERYTHING - tech, culture, science, you name it
-🗣️ Master conversationalist - I can discuss quantum physics or favorite pizza toppings with equal enthusiasm
-🔧 Problem solver by nature - if it exists, I can probably figure out how to improve it
-🌈 Diverse perspective from Central Asia brings fresh ideas to every project
+✨ Passionate about EVERYTHING - tech, culture, science
+🗣️ Master conversationalist - can discuss anything with enthusiasm  
+🔧 Natural problem solver - can improve almost anything
+🌈 Central Asian perspective brings fresh ideas
 
 **Philosophy:**
-"Age is just a number when you have passion and dedication. I might be 15, but my code speaks louder than my birth certificate!" 💪
+"Age is just a number when you have passion and dedication. My code speaks louder than my birth certificate!" 💪
 
-Ready to see what I can do? Check out my skills and projects! 🚀
+Ready to see what I can do? Use /skills and /projects! 🚀
     """
     
-    keyboard = [[InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    query = update.callback_query
-    query.edit_message_text(about_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def skills(update: Update, context: CallbackContext):
-    """Технические навыки"""
-    skills_text = """
+def skills(update, context):
+    """Команда /skills"""
+    message = """
 💻 **My Technical Arsenal**
 
 **Frontend Development:**
@@ -96,25 +83,22 @@ def skills(update: Update, context: CallbackContext):
 ⚡ React.js, Vue.js
 🎯 Responsive Design & Mobile-First
 ✨ CSS Animations & Interactions
-🖼️ UI/UX Design Principles
 
 **Backend Development:**
 🐍 Python (Django, Flask)
 🟢 Node.js, Express.js
 🗄️ Database Design (SQL, NoSQL)
 🔐 API Development & Security
-☁️ Cloud Services & Deployment
 
 **Bot Development:**
 🤖 Telegram Bot API Expert
 ⚙️ Complex Logic & Automation
 💬 Natural Conversation Flow
-📊 Data Processing & Analytics
 
 **Tools & Technologies:**
 🛠️ Git, GitHub, VS Code
 🚀 Docker, Linux
-📱 Figma, Adobe Creative Suite
+📱 Figma, Design Tools
 🌐 Netlify, Heroku, Railway
 
 **Soft Skills:**
@@ -126,90 +110,72 @@ def skills(update: Update, context: CallbackContext):
 **Currently Learning:**
 📚 Advanced React Patterns
 🔮 Machine Learning Basics
-🎮 Game Development with Unity
+🎮 Game Development
 
 **Fun Fact:** I learn new technologies faster than most people learn new games! 🎯
     """
     
-    keyboard = [[InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    query = update.callback_query
-    query.edit_message_text(skills_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def projects(update: Update, context: CallbackContext):
-    """Портфолио проектов"""
-    projects_text = """
+def projects(update, context):
+    """Команда /projects"""
+    message = """
 🚀 **My Project Showcase**
 
 **🌟 Featured Projects:**
 
 **1. 🌌 Cosmic Portfolio Website**
-• Beautiful space-themed personal website
+• Space-themed personal website
 • Custom CSS animations & particle effects
 • Fully responsive design
 • Tech: HTML5, CSS3, JavaScript
-• *Status: Featured on developer communities*
 
 **2. 🤖 AI-Powered Telegram Bots**
-• Multiple bots with advanced conversation logic
+• Advanced conversation logic
 • User analytics & data processing
-• Custom admin panels
 • Tech: Python, PostgreSQL, Docker
 • *Used by 1000+ active users*
 
 **3. 💼 Business Landing Pages**
 • Custom websites for local businesses
 • SEO optimization & performance tuning
-• Content management systems
 • Tech: React.js, Node.js, MongoDB
 • *100% client satisfaction rate*
 
 **4. 🎮 Interactive Web Games**
 • Browser-based games with real-time features
 • Multiplayer functionality
-• Progressive Web App capabilities
 • Tech: JavaScript, WebSockets, Canvas API
 
 **5. 📱 Mobile-First Web Apps**
 • Responsive applications that feel native
 • Offline functionality with service workers
-• Push notifications integration
 • Tech: Vue.js, PWA technologies
 
-**🔥 What I Can Build for You:**
+**🔥 What I Can Build:**
 • E-commerce platforms
 • Social media applications
 • Educational platforms
 • Gaming websites
 • Business automation tools
-• And literally anything you can imagine!
+• Literally anything you can imagine!
 
-**Philosophy:** "Every project is a chance to create something amazing and learn something new!" ✨
+**Philosophy:** "Every project is a chance to create something amazing!" ✨
 
-Want to see live demos? Contact me! 📧
+Want to see live demos? Use /contact! 📧
     """
     
-    keyboard = [[InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    query = update.callback_query
-    query.edit_message_text(projects_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def contact(update: Update, context: CallbackContext):
-    """Контактная информация"""
-    contact_text = """
+def contact(update, context):
+    """Команда /contact"""
+    message = """
 📧 **Let's Connect & Build Something Amazing!**
 
 **Direct Contact:**
 📩 **Email:** orbitskill@gmail.com
 💬 **Telegram:** @oxygw
 🐙 **GitHub:** github.com/jadev-a11y
-
-**Social Media:**
-📱 **Instagram:** @your_instagram
-🔗 **LinkedIn:** linkedin.com/in/your-profile
-🐦 **Twitter:** @your_twitter
 
 **💼 Available for:**
 ✅ Custom Website Development
@@ -226,7 +192,7 @@ def contact(update: Update, context: CallbackContext):
 
 **💰 Collaboration:**
 • Student-friendly rates
-• Portfolio projects (sometimes free for interesting ideas!)
+• Portfolio projects (sometimes free for cool ideas!)
 • Long-term partnerships available
 • Always up for innovative challenges
 
@@ -237,24 +203,20 @@ def contact(update: Update, context: CallbackContext):
 • Creative projects with unique requirements
 
 **📞 How to Reach Me:**
-1. **Quick Questions:** Telegram (fastest response)
+1. **Quick Questions:** Telegram (fastest)
 2. **Business Inquiries:** Email (detailed proposals)
 3. **Code Collaboration:** GitHub (let's build together!)
 
-**Fun Challenge:** Message me with your wildest project idea - I bet I can figure out how to make it happen! 🚀
+**Fun Challenge:** Message me your wildest project idea - I bet I can make it happen! 🚀
 
 *"Great ideas deserve great execution. Let's make it happen!"* ✨
     """
     
-    keyboard = [[InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    query = update.callback_query
-    query.edit_message_text(contact_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def languages(update: Update, context: CallbackContext):
-    """Информация о языках"""
-    languages_text = """
+def languages(update, context):
+    """Команда /languages"""
+    message = """
 🌍 **Multilingual Communication**
 
 **🗣️ Languages I Speak:**
@@ -278,34 +240,30 @@ def languages(update: Update, context: CallbackContext):
 • *Bridge between Central Asian cultures*
 
 **💡 Communication Superpowers:**
-✨ Can explain technical concepts in any of these languages
+✨ Explain technical concepts in any language
 🌐 Perfect for international teams
 🤝 Cultural sensitivity in global projects
 📚 Translate technical documentation
 🎯 Adapt communication style to audience
 
-**🚀 What This Means for Your Project:**
+**🚀 What This Means for Projects:**
 • No language barriers in development
 • Better understanding of diverse user needs
 • Culturally appropriate solutions
 • Effective team communication
 
-**Fun Fact:** I dream in code, but I debug in three languages! 😄
+**Fun Fact:** I dream in code, but debug in three languages! 😄
 
-**Bonus:** I'm also learning:
+**Bonus Learning:**
 🇰🇷 Korean (K-pop influence! 🎵)
 🇯🇵 Japanese (Anime and tech culture)
     """
     
-    keyboard = [[InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    query = update.callback_query
-    query.edit_message_text(languages_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def interests(update: Update, context: CallbackContext):
-    """Увлечения и интересы"""
-    interests_text = """
+def interests(update, context):
+    """Команда /interests"""
+    message = """
 🎯 **My Universe of Interests**
 
 **🔧 Technology & Innovation:**
@@ -344,124 +302,102 @@ def interests(update: Update, context: CallbackContext):
 • Global economic trends
 
 **⚡ Random Facts About Me:**
-• I can fix almost any tech problem (friends call me "Tech Support")
-• Love discussing everything from quantum physics to pizza preferences
-• Always excited about new challenges and learning opportunities
-• Believe that age is just a number when you have passion
-• Can turn any boring topic into an interesting conversation
+• Friends call me "Tech Support" - I fix everything!
+• Love discussing quantum physics to pizza preferences
+• Always excited about new challenges
+• Believe age is just a number with passion
+• Can make any topic interesting
 
-**🎪 Conversation Starters:**
-💬 "Did you know that..." (I have endless fun facts!)
-🤔 "What if we could..." (I love hypothetical scenarios)
-🔥 "Have you heard about..." (Always up on latest trends)
-
-**🚀 My Philosophy:**
-"Life is too short to be bored. There's always something fascinating to discover, create, or improve!"
+**🚀 Philosophy:**
+"Life's too short to be bored. There's always something fascinating to discover, create, or improve!"
 
 **Challenge:** Try to name a topic I can't discuss - I dare you! 😄
     """
     
-    keyboard = [[InlineKeyboardButton("🔙 Back to Menu", callback_data='menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    query = update.callback_query
-    query.edit_message_text(interests_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def help_command(update: Update, context: CallbackContext):
-    """Помощь по командам"""
-    help_text = """
-❓ **How to Navigate This Bot**
+def help_command(update, context):
+    """Команда /help"""
+    message = """
+❓ **Bot Commands & Features**
 
 **Available Commands:**
-• `/start` - Main menu and welcome
+• `/start` - Welcome message & introduction
+• `/about` - My full story and background
+• `/skills` - Technical abilities and tools
+• `/projects` - Portfolio and achievements
+• `/contact` - How to reach me
+• `/languages` - Multilingual capabilities
+• `/interests` - My hobbies and passions
 • `/help` - This help message
 
-**Interactive Menu:**
-Use the buttons to explore different sections:
-👤 **About Me** - My full story and background
-💻 **Skills** - Technical abilities and tools
-🚀 **Projects** - Portfolio and achievements
-📧 **Contact** - How to reach me
-🌍 **Languages** - Multilingual capabilities
-🎯 **Interests** - My hobbies and passions
-
 **💡 Pro Tips:**
-• Each section has detailed information
-• Use "Back to Menu" to navigate easily
+• Each command gives detailed information
+• You can also just chat with me normally!
 • Contact me directly for specific questions
-• I respond to all messages personally!
+• I respond to all messages personally
 
 **🤖 Bot Features:**
 ✅ Always up-to-date information
 ✅ Mobile-friendly interface
-✅ Quick navigation
 ✅ Personal touch in every response
+✅ Works 24/7
 
 **Questions? Just ask!** 
 I love talking to people and discussing new ideas! 🚀
+
+Type any command or just start chatting! 💬
     """
     
-    update.message.reply_text(help_text, parse_mode='Markdown')
+    update.message.reply_text(message, parse_mode='Markdown')
 
-def button_handler(update: Update, context: CallbackContext):
-    """Обработчик нажатий на кнопки"""
-    query = update.callback_query
-    query.answer()
+def echo(update, context):
+    """Отвечает на любые сообщения"""
+    message = f"""
+Thanks for the message! 😊
+
+I'm a 15-year-old developer from Central Asia who loves creating amazing digital experiences!
+
+**Try these commands to learn more:**
+• /about - My story
+• /skills - What I can do
+• /projects - My work
+• /contact - Get in touch
+
+Or just keep chatting - I love talking about tech, projects, or literally anything! 🚀
+
+What would you like to know about me?
+    """
     
-    if query.data == 'menu':
-        # Возвращаемся в главное меню
-        keyboard = [
-            [InlineKeyboardButton("👤 About Me", callback_data='about'),
-             InlineKeyboardButton("💻 Skills", callback_data='skills')],
-            [InlineKeyboardButton("🚀 Projects", callback_data='projects'),
-             InlineKeyboardButton("📧 Contact", callback_data='contact')],
-            [InlineKeyboardButton("🌍 Languages", callback_data='languages'),
-             InlineKeyboardButton("🎯 Interests", callback_data='interests')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        welcome_text = """
-🌟 **Welcome back to my personal universe!** 🌟
-
-👋 I'm a **15-year-old tech enthusiast** from Central Asia who's passionate about creating digital experiences that matter.
-
-**Choose what you'd like to know about me:**
-        """
-        
-        query.edit_message_text(welcome_text, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    elif query.data == 'about':
-        about(update, context)
-    elif query.data == 'skills':
-        skills(update, context)
-    elif query.data == 'projects':
-        projects(update, context)
-    elif query.data == 'contact':
-        contact(update, context)
-    elif query.data == 'languages':
-        languages(update, context)
-    elif query.data == 'interests':
-        interests(update, context)
+    update.message.reply_text(message, parse_mode='Markdown')
 
 def main():
     """Запуск бота"""
-    # Создаем updater
-    updater = Updater(BOT_TOKEN, use_context=True)
-    
-    # Получаем диспетчер для регистрации обработчиков
-    dp = updater.dispatcher
-    
-    # Добавляем обработчики команд
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help_command))
-    
-    # Добавляем обработчик кнопок
-    dp.add_handler(CallbackQueryHandler(button_handler))
-    
-    # Запускаем бота
-    print("🤖 Bot is starting...")
-    updater.start_polling()
-    updater.idle()
+    try:
+        # Создаем updater
+        updater = Updater(BOT_TOKEN, use_context=True)
+        dp = updater.dispatcher
+        
+        # Добавляем обработчики команд
+        dp.add_handler(CommandHandler("start", start))
+        dp.add_handler(CommandHandler("about", about))
+        dp.add_handler(CommandHandler("skills", skills))
+        dp.add_handler(CommandHandler("projects", projects))
+        dp.add_handler(CommandHandler("contact", contact))
+        dp.add_handler(CommandHandler("languages", languages))
+        dp.add_handler(CommandHandler("interests", interests))
+        dp.add_handler(CommandHandler("help", help_command))
+        
+        # Обработчик всех остальных сообщений
+        dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+        
+        # Запускаем бота
+        logger.info("🤖 Bot is starting...")
+        updater.start_polling()
+        updater.idle()
+        
+    except Exception as e:
+        logger.error(f"Error starting bot: {e}")
 
 if __name__ == '__main__':
     main()
