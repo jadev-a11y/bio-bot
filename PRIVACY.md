@@ -1,203 +1,174 @@
-Privacy Policy for Level Up Developer Bot
+# Terms of Use & Privacy Policy
 
 **Effective Date:** June 17, 2025  
 **Last Updated:** June 17, 2025
 
- 1. Information We Collect
+---
 
- 1.1 Automatically Collected Information
-When you interact with our Telegram bot, we automatically collect:
-- Telegram user ID (unique identifier)
-- Username (if publicly available)
-- First name and last name (if provided)
-- Language preference
-- Timestamp of interactions
-- Message content sent to the bot
-- Command usage statistics
+## IMPORTANT NOTICE
 
- 1.2 Information You Provide
-We collect information you voluntarily provide when:
-- Sending messages to the bot
-- Using interactive commands
-- Requesting information about services
-- Providing feedback or inquiries
-
- 1.3 Technical Information
-We may collect technical information including:
-- Telegram client type and version
-- Operating system information
-- Network connection details
-- Error logs and performance metrics
-
- 2. How We Use Your Information
-
- 2.1 Primary Purposes
-We use collected information to:
-- Provide personalized responses and assistance
-- Process and respond to your commands and queries
-- Improve bot functionality and user experience
-- Maintain and troubleshoot technical issues
-- Generate usage analytics and performance metrics
-
- 2.2 Communication
-We may use your information to:
-- Send responses to your inquiries
-- Provide updates about bot functionality
-- Notify you of important changes to our services
-- Respond to support requests
-
- 2.3 Service Improvement
-Information is used for:
-- Analyzing usage patterns
-- Improving response accuracy
-- Developing new features
-- Optimizing bot performance
-- Conducting security assessments
-
- 3. Data Storage and Retention
-
- 3.1 Storage Duration
-- Message data: Processed in real-time and not permanently stored
-- User interaction logs: Retained for up to 30 days for debugging purposes
-- Technical logs: Retained for up to 90 days for security and performance analysis
-- Analytics data: Aggregated and anonymized data may be retained indefinitely
-
- 3.2 Storage Location
-Data is stored on secure cloud servers provided by:
-- Render.com (Primary hosting)
-- Telegram servers (Message delivery)
-- GitHub (Code repository - no personal data)
-
- 3.3 Data Security
-We implement appropriate technical and organizational measures including:
-- Encryption in transit and at rest
-- Access controls and authentication
-- Regular security assessments
-- Secure coding practices
-- Incident response procedures
-
- 4. Data Sharing and Disclosure
-
-4.1 Third-Party Services
-We may share limited data with:
-- **Telegram**: Required for bot functionality and message delivery
-- **Render.com**: Cloud hosting provider for bot infrastructure
-- **Analytics services**: Anonymized usage statistics only
-
- 4.2 Legal Requirements
-We may disclose information when required by:
-- Valid legal process or court order
-- Law enforcement investigations
-- Protection of rights, property, or safety
-- Compliance with applicable laws and regulations
-
- 4.3 Business Transfers
-In the event of a merger, acquisition, or sale of assets, user information may be transferred as part of the transaction, subject to the same privacy protections.
-
- 5. Your Rights and Choices
-
- 5.1 Access and Control
-You have the right to:
-- Request information about data we collect
-- Access your personal data
-- Request correction of inaccurate information
-- Request deletion of your data
-- Object to certain data processing activities
-
- 5.2 Communication Preferences
-You can control communications by:
-- Stopping bot interactions at any time
-- Blocking the bot in Telegram
-- Requesting removal from any mailing lists
-
- 5.3 Data Portability
-Upon request, we can provide your data in a structured, commonly used format.
-
- 6. Children's Privacy
-
-### 6.1 Age Restrictions
-Our bot is intended for users aged 13 and older. We do not knowingly collect personal information from children under 13.
-
- 6.2 Parental Consent
-If we become aware that we have collected information from a child under 13 without parental consent, we will take steps to delete such information promptly.
-
- 7. International Data Transfers
-
- 7.1 Cross-Border Processing
-Your information may be processed in countries other than your country of residence, including the United States and European Union.
-
- 7.2 Safeguards
-We ensure appropriate safeguards are in place for international transfers, including:
-- Standard contractual clauses
-- Adequacy decisions
-- Certification schemes
-- Binding corporate rules
-
- 8. Cookies and Tracking
-
- 8.1 Bot Interactions
-Our Telegram bot does not use cookies, but may use:
-- Session identifiers for conversation continuity
-- Temporary storage for command processing
-- Usage analytics for service improvement
-
-9. Changes to Privacy Policy
-
- 9.1 Updates
-We may update this Privacy Policy periodically to reflect:
-- Changes in our practices
-- Legal or regulatory requirements
-- New features or services
-- User feedback and concerns
-
- 9.2 Notification
-Material changes will be communicated through:
-- Bot announcements
-- Updated effective date
-- Direct notification when required
-
- 10. Contact Information
-
- 10.1 Privacy Questions
-For privacy-related inquiries, contact us at:
-- **Email**: orbitskill@gmail.com
-- **Telegram**: @oxygw
-- **Response Time**: Within 72 hours
-
-10.2 Data Protection Officer
-For EU residents, you may contact our designated representative for data protection matters.
-
- 11. Legal Basis for Processing (GDPR)
-
-We process personal data based on:
-- **Legitimate interests**: Service provision and improvement
-- **Consent**: When explicitly provided
-- **Legal obligations**: Compliance requirements
-- **Contract performance**: Service delivery
-
- 12. Automated Decision Making
-
-We do not engage in automated decision-making or profiling that produces legal or similarly significant effects.
-
- 13. Data Breach Notification
-
-In the event of a data breach, we will:
-- Notify relevant authorities within 72 hours
-- Inform affected users when required
-- Take immediate remedial action
-- Conduct thorough investigation
-
- 14. Compliance
-
-This Privacy Policy complies with:
-- General Data Protection Regulation (GDPR)
-- California Consumer Privacy Act (CCPA)
-- Telegram Terms of Service
-- Other applicable privacy laws
+**BY USING THIS BOT, YOU AUTOMATICALLY ACCEPT ALL TERMS AND CONDITIONS STATED BELOW. IGNORANCE OF THESE TERMS DOES NOT EXEMPT YOU FROM RESPONSIBILITY OR LIABILITY.**
 
 ---
 
-**Last Review Date**: June 17, 2025  
-**Next Scheduled Review**: December 17, 2025
+## 1. Service Description
 
-By using our bot, you acknowledge that you have read and understood this Privacy Policy and agree to the collection, use, and disclosure of your information as described herein.
+This Telegram bot provides simple biography creation and related services. The bot is provided "as-is" without warranties of any kind.
+
+## 2. Acceptance of Terms
+
+- **Automatic Acceptance**: Using this bot constitutes immediate and full acceptance of these terms
+- **No Exceptions**: Lack of awareness of these terms does not exempt users from compliance
+- **Binding Agreement**: These terms create a legally binding agreement between you and the service provider
+- **Continued Use**: Continued use after any modifications constitutes acceptance of updated terms
+
+## 3. Information We Collect
+
+### 3.1 Automatically Collected Data
+- Telegram user ID and username
+- Message content and commands
+- Interaction timestamps
+- Basic technical information
+
+### 3.2 Data Usage
+We use collected information to:
+- Provide bot functionality
+- Improve service quality
+- Maintain security and prevent abuse
+- Comply with legal requirements
+
+## 4. Data Storage & Retention
+
+- **Messages**: Processed in real-time, may be temporarily cached
+- **User Data**: Retained for up to 90 days for security purposes
+- **Analytics**: Anonymized data retained indefinitely
+- **Location**: Data stored on secure cloud servers (Render.com, Telegram servers)
+
+## 5. User Rights (Limited)
+
+### 5.1 Data Access
+You may request information about your data **once per month** by:
+- Emailing orbitskill@gmail.com
+- Providing Telegram ID and identity verification
+- Waiting up to 30 days for response
+
+### 5.2 Data Deletion
+Limited deletion available with exceptions for:
+- Security logs (retained 90 days minimum)
+- Legal compliance requirements
+- Anonymized analytics data
+- Abuse prevention records
+
+### 5.3 Restrictions
+- Maximum 1 request per month per user
+- Identity verification required for all requests
+- Technical logs excluded from access requests
+- Some data retained regardless of deletion requests
+
+## 6. Prohibited Uses
+
+Users may not:
+- Use the bot for illegal activities
+- Attempt to compromise bot security
+- Spam or abuse bot functions
+- Share harmful, offensive, or inappropriate content
+- Reverse engineer or attempt to access restricted data
+
+## 7. Limitation of Liability
+
+### 7.1 Service Availability
+- Bot provided "as-is" without uptime guarantees
+- No warranty of continuous availability
+- Maintenance and updates may cause temporary outages
+
+### 7.2 Content Responsibility
+- Users solely responsible for content they submit
+- Service provider not liable for user-generated content
+- Users liable for any damages caused by their usage
+
+### 7.3 Damages
+**TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SERVICE PROVIDER SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING FROM USE OF THIS BOT.**
+
+## 8. Termination
+
+### 8.1 By User
+Users may stop using the bot at any time by ceasing interactions.
+
+### 8.2 By Service Provider
+We reserve the right to:
+- Terminate or suspend access without notice
+- Block users for violations or suspicious activity
+- Modify or discontinue service at any time
+
+## 9. Data Sharing
+
+### 9.1 Third Parties
+Limited data sharing with:
+- **Telegram**: Required for bot operation
+- **Cloud providers**: For hosting and infrastructure
+- **Legal authorities**: When required by law
+
+### 9.2 No Sale
+We do not sell personal data to third parties.
+
+## 10. Security
+
+### 10.1 Our Measures
+We implement reasonable security measures including:
+- Encryption for data transmission
+- Access controls
+- Regular security assessments
+
+### 10.2 User Responsibility
+Users responsible for:
+- Securing their Telegram account
+- Not sharing sensitive information through the bot
+- Reporting suspicious activity
+
+## 11. Children's Privacy
+
+- Service intended for users 13+ years old
+- We do not knowingly collect data from children under 13
+- Parents may contact us to remove child's data
+
+## 12. International Users
+
+- Data may be processed in various countries
+- Users consent to international data transfers
+- Appropriate safeguards implemented for cross-border transfers
+
+## 13. Changes to Terms
+
+### 13.1 Modifications
+We may update these terms at any time by:
+- Posting updated terms with new effective date
+- Continuing use constitutes acceptance of changes
+- Major changes may be announced through the bot
+
+### 13.2 No Individual Notice
+**WE ARE NOT OBLIGATED TO PROVIDE INDIVIDUAL NOTICE OF CHANGES. USERS RESPONSIBLE FOR REGULARLY REVIEWING TERMS.**
+
+## 14. Governing Law
+
+These terms governed by applicable law in the jurisdiction where the service provider operates. Disputes resolved through binding arbitration where permitted by law.
+
+## 15. Severability
+
+If any provision of these terms is found unenforceable, remaining provisions continue in full force and effect.
+
+## 16. Contact Information
+
+**Support**: orbitskill@gmail.com  
+**Telegram**: @oxygw  
+**Response Time**: Up to 72 hours
+
+---
+
+## FINAL REMINDER
+
+**🚨 CRITICAL: By interacting with this bot in any way, you confirm that you have read, understood, and agree to be bound by all terms above. Lack of knowledge of these terms does not excuse non-compliance. Your use of this service constitutes legal acceptance of all conditions.**
+
+---
+
+**Last Review**: June 17, 2025  
+**Next Review**: December 17, 2025
