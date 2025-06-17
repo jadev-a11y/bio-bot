@@ -1099,6 +1099,9 @@ def lang_command(message):
     markup = create_language_menu()
     bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
 
+# Исправленный обработчик callback'ов
+# Замените эту часть в вашем коде:
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     """Обработчик нажатий на кнопки"""
@@ -1134,13 +1137,45 @@ def callback_handler(call):
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
                              reply_markup=markup, parse_mode='Markdown')
     
-    # Обработка основных разделов
-    elif call.data in ['about', 'skills', 'projects', 'contact', 'languages', 'interests']:
-        text = t(call.data, user_id)
+    # ИСПРАВЛЕННАЯ ЧАСТЬ - обработка основных разделов
+    elif call.data == "about":
+        text = t('about_me', user_id)  # Изменено с 'about' на 'about_me'
         markup = create_back_menu(user_id)
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
                              reply_markup=markup, parse_mode='Markdown')
     
+    elif call.data == "skills":
+        text = t('skills', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "projects":
+        text = t('projects', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "contact":
+        text = t('contact', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "languages":
+        text = t('languages', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "interests":
+        text = t('interests', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    # Подтверждение обработки callback
+    bot.answer_callback_query(call.id)
     # Подтверждение обработки callback
     bot.answer_callback_query(call.id)
 
