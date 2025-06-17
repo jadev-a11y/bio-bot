@@ -2,7 +2,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
 # Загружаем переменные из .env файла (для локальной разработки)
 load_dotenv()
@@ -21,7 +21,7 @@ if not BOT_TOKEN:
     print("Set it in your hosting platform (Render/Railway) settings")
     exit(1)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start(update: Update, context: CallbackContext):
     """Стартовое сообщение с главным меню"""
     keyboard = [
         [InlineKeyboardButton("👤 About Me", callback_data='about'),
@@ -49,9 +49,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 **Choose what you'd like to know about me:**
     """
     
-    await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode='Markdown')
+    update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def about(update: Update, context: CallbackContext):
     """Подробная информация обо мне"""
     about_text = """
 👨‍💻 **About Me - The Full Story**
@@ -81,9 +81,9 @@ Ready to see what I can do? Check out my skills and projects! 🚀
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     query = update.callback_query
-    await query.edit_message_text(about_text, reply_markup=reply_markup, parse_mode='Markdown')
+    query.edit_message_text(about_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def skills(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def skills(update: Update, context: CallbackContext):
     """Технические навыки"""
     skills_text = """
 💻 **My Technical Arsenal**
@@ -132,9 +132,9 @@ async def skills(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     query = update.callback_query
-    await query.edit_message_text(skills_text, reply_markup=reply_markup, parse_mode='Markdown')
+    query.edit_message_text(skills_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def projects(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def projects(update: Update, context: CallbackContext):
     """Портфолио проектов"""
     projects_text = """
 🚀 **My Project Showcase**
@@ -191,17 +191,17 @@ Want to see live demos? Contact me! 📧
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     query = update.callback_query
-    await query.edit_message_text(projects_text, reply_markup=reply_markup, parse_mode='Markdown')
+    query.edit_message_text(projects_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def contact(update: Update, context: CallbackContext):
     """Контактная информация"""
     contact_text = """
 📧 **Let's Connect & Build Something Amazing!**
 
-    **Direct Contact:**
+**Direct Contact:**
 📩 **Email:** orbitskill@gmail.com
 💬 **Telegram:** @oxygw
-🐙 **GitHub:** github.com/oxygw
+🐙 **GitHub:** github.com/jadev-a11y
 
 **Social Media:**
 📱 **Instagram:** @your_instagram
@@ -247,9 +247,9 @@ async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     query = update.callback_query
-    await query.edit_message_text(contact_text, reply_markup=reply_markup, parse_mode='Markdown')
+    query.edit_message_text(contact_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def languages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def languages(update: Update, context: CallbackContext):
     """Информация о языках"""
     languages_text = """
 🌍 **Multilingual Communication**
@@ -298,9 +298,9 @@ async def languages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     query = update.callback_query
-    await query.edit_message_text(languages_text, reply_markup=reply_markup, parse_mode='Markdown')
+    query.edit_message_text(languages_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def interests(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def interests(update: Update, context: CallbackContext):
     """Увлечения и интересы"""
     interests_text = """
 🎯 **My Universe of Interests**
@@ -362,9 +362,9 @@ async def interests(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     query = update.callback_query
-    await query.edit_message_text(interests_text, reply_markup=reply_markup, parse_mode='Markdown')
+    query.edit_message_text(interests_text, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def help_command(update: Update, context: CallbackContext):
     """Помощь по командам"""
     help_text = """
 ❓ **How to Navigate This Bot**
@@ -372,8 +372,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 **Available Commands:**
 • `/start` - Main menu and welcome
 • `/help` - This help message
-• `/about` - Quick about me
-• `/contact` - Direct contact info
 
 **Interactive Menu:**
 Use the buttons to explore different sections:
@@ -400,12 +398,12 @@ Use the buttons to explore different sections:
 I love talking to people and discussing new ideas! 🚀
     """
     
-    await update.message.reply_text(help_text, parse_mode='Markdown')
+    update.message.reply_text(help_text, parse_mode='Markdown')
 
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def button_handler(update: Update, context: CallbackContext):
     """Обработчик нажатий на кнопки"""
     query = update.callback_query
-    await query.answer()
+    query.answer()
     
     if query.data == 'menu':
         # Возвращаемся в главное меню
@@ -427,36 +425,40 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 **Choose what you'd like to know about me:**
         """
         
-        await query.edit_message_text(welcome_text, reply_markup=reply_markup, parse_mode='Markdown')
+        query.edit_message_text(welcome_text, reply_markup=reply_markup, parse_mode='Markdown')
     
     elif query.data == 'about':
-        await about(update, context)
+        about(update, context)
     elif query.data == 'skills':
-        await skills(update, context)
+        skills(update, context)
     elif query.data == 'projects':
-        await projects(update, context)
+        projects(update, context)
     elif query.data == 'contact':
-        await contact(update, context)
+        contact(update, context)
     elif query.data == 'languages':
-        await languages(update, context)
+        languages(update, context)
     elif query.data == 'interests':
-        await interests(update, context)
+        interests(update, context)
 
 def main():
     """Запуск бота"""
-    # Создаем приложение
-    application = Application.builder().token(BOT_TOKEN).build()
+    # Создаем updater
+    updater = Updater(BOT_TOKEN, use_context=True)
+    
+    # Получаем диспетчер для регистрации обработчиков
+    dp = updater.dispatcher
     
     # Добавляем обработчики команд
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("help", help_command))
     
     # Добавляем обработчик кнопок
-    application.add_handler(CallbackQueryHandler(button_handler))
+    dp.add_handler(CallbackQueryHandler(button_handler))
     
     # Запускаем бота
     print("🤖 Bot is starting...")
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == '__main__':
     main()
