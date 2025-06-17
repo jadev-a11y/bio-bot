@@ -33,7 +33,6 @@ translations = {
 • Telegram bots that actually work
 • And pretty much anything tech-related!
 
-
 **Choose what you'd like to know about me:**""",
         'ru': """🌟 **Добро пожаловать {name} в мою личную вселенную!** 🌟
 
@@ -45,7 +44,6 @@ translations = {
 • Telegram боты, которые реально работают
 • И практически всё, что связано с технологиями!
 
-
 **Выберите, что вы хотели бы узнать обо мне:**""",
         'uz': """🌟 **Xush kelibsiz {name} mening shaxsiy olamimga!** 🌟
 
@@ -56,7 +54,6 @@ translations = {
 • Har qanday didga mos maxsus veb-saytlar
 • Haqiqatan ishlaydigantelegram botlar
 • Va texnologiya bilan bog'liq deyarli hamma narsa!
-
 
 **Men haqimda nimani bilishni xohlaysiz, tanlang:**"""
     },
