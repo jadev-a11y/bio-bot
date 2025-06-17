@@ -422,7 +422,7 @@ if __name__ == "__main__":
         bot.polling(none_stop=True)
     except Exception as e:
         logger.error(f"Error: {e}")
-    },
+    }
     
     'language_select': {
         'en': '🌐 **Select your language / Выберите язык:**',
