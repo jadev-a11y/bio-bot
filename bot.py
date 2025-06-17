@@ -781,7 +781,6 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 **🚀 My Philosophy:**
 "Life is too short to be bored. There's always something fascinating to discover, create, or improve!"
 
-**Challenge:** Try to name a topic I can't discuss - I dare you! 😄""",
         'ru': """🎯 **Моя вселенная интересов**
 
 **🔧 Технологии и инновации:**
@@ -829,7 +828,6 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 **🚀 Моя философия:**
 "Жизнь слишком коротка, чтобы скучать. Всегда есть что-то увлекательное для открытия, создания или улучшения!"
 
-**Вызов:** Попробуйте назвать тему, которую я не могу обсуждать - вызываю вас! 😄""",
         'uz': """🎯 **Mening qiziqishlar olami**
 
 **🔧 Texnologiya va innovatsiya:**
@@ -877,7 +875,6 @@ Jonli demo ko'rishni xohlaysizmi? Men bilan bog'laning! 📧"""
 **🚀 Mening falsafam:**
 "Hayot zerikish uchun juda qisqa. Har doim kashf qilish, yaratish yoki yaxshilash uchun qiziqarli narsa bor!"
 
-**Qiyinchilik:** Men muhokama qila olmaydigan mavzuni ayting - sizni chaqiraman! 😄"""
     },
     
     'message_reply': {
