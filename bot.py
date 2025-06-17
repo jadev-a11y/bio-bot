@@ -974,6 +974,23 @@ elif call.data == "interests":
         bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
                              reply_markup=markup, parse_mode='Markdown')
     
+elif call.data == "personal_info":
+    if user_id not in user_password_attempts:
+        user_password_attempts[user_id] = 3
+    
+    if user_password_attempts[user_id] <= 0:
+        text = t('access_blocked', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    else:
+        text = t('password_prompt', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+        
+        user_languages[user_id + 1000000] = 'waiting_password'
+
     # Подтверждение обработки callback
     bot.answer_callback_query(call.id)
 
