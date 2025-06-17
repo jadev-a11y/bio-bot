@@ -1,4 +1,3 @@
-python
 import os
 import telebot
 from telebot import types
@@ -115,6 +114,314 @@ translations = {
 
 **Выберите, что вы хотели бы узнать обо мне:**"""
     },
+    
+    'password_prompt': {
+        'en': '🔐 **Access to Personal Information**\n\nThis section contains private details about my real personality, hobbies, and personal life beyond the professional side.\n\n🔑 **Please enter the access code to continue:**\n\n💡 *Hint: Special combination from my personal life*',
+        'ru': '🔐 **Доступ к личной информации**\n\nЭтот раздел содержит личные детали о моей настоящей личности, хобби и личной жизни за пределами профессиональной стороны.\n\n🔑 **Пожалуйста, введите код доступа для продолжения:**\n\n💡 *Подсказка: Особая комбинация из моей личной жизни*'
+    },
+    
+    'wrong_password': {
+        'en': '❌ **Access Denied**\n\n🚫 Incorrect access code. Please try again.\n\n💡 *Hint: Think about something very personal to me*\n\n🔄 **Attempts remaining: {attempts}**',
+        'ru': '❌ **Доступ запрещен**\n\n🚫 Неверный код доступа. Попробуйте еще раз.\n\n💡 *Подсказка: Подумайте о чем-то очень личном для меня*\n\n🔄 **Осталось попыток: {attempts}**'
+    },
+    
+    'access_blocked': {
+        'en': '🚨 **Access Temporarily Blocked**\n\n⏰ Too many incorrect attempts. Access to personal information is temporarily restricted.\n\n🔄 **Try again later or contact me directly.**',
+        'ru': '🚨 **Доступ временно заблокирован**\n\n⏰ Слишком много неверных попыток. Доступ к личной информации временно ограничен.\n\n🔄 **Попробуйте позже или свяжитесь со мной напрямую.**'
+    },
+    
+    'message_reply': {
+        'en': """Thanks for the message! 😊
+
+I'm a 15-year-old developer from Central Asia who loves creating amazing digital experiences!
+
+Use /start to see the main menu with all my information, or just keep chatting - I love talking about tech, projects, or literally anything! 🚀
+
+What would you like to know about me?""",
+        'ru': """Спасибо за сообщение! 😊
+
+Я 15-летний разработчик из Центральной Азии, который любит создавать удивительные цифровые решения!
+
+Используйте /start чтобы увидеть главное меню со всей информацией обо мне, или просто продолжайте общаться - я люблю говорить о технологиях, проектах или буквально о чём угодно! 🚀
+
+Что вы хотели бы узнать обо мне?"""
+    },
+    
+    'back_to_menu': {
+        'en': '🔙 Back to Menu',
+        'ru': '🔙 Назад в меню'
+    },
+    
+    'change_lang': {
+        'en': '🌐 Change Language',
+        'ru': '🌐 Изменить язык'
+    }
+}
+
+# Кнопки меню
+menu_buttons = {
+    'about': {
+        'en': '👤 About Me',
+        'ru': '👤 Обо мне'
+    },
+    'skills': {
+        'en': '💻 Skills',
+        'ru': '💻 Навыки'
+    },
+    'projects': {
+        'en': '🚀 Projects',
+        'ru': '🚀 Проекты'
+    },
+    'contact': {
+        'en': '📧 Contact',
+        'ru': '📧 Контакты'
+    },
+    'languages': {
+        'en': '🌍 Languages',
+        'ru': '🌍 Языки'
+    },
+    'interests': {
+        'en': '🎯 Interests',
+        'ru': '🎯 Интересы'
+    },
+    'personal_info': {
+        'en': '🔒 Personal Information',
+        'ru': '🔒 Личная информация'
+    }
+}
+
+def get_user_language(user_id):
+    """Получить язык пользователя"""
+    return user_languages.get(user_id, 'en')
+
+def set_user_language(user_id, lang):
+    """Установить язык пользователя"""
+    user_languages[user_id] = lang
+
+def t(key, user_id, **kwargs):
+    """Получить перевод для пользователя"""
+    lang = get_user_language(user_id)
+    text = translations.get(key, {}).get(lang, translations.get(key, {}).get('en', key))
+    return text.format(**kwargs)
+
+def create_language_menu():
+    """Создает меню выбора языка"""
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    
+    for lang_code, lang_name in LANGUAGES.items():
+        btn = types.InlineKeyboardButton(lang_name, callback_data=f"lang_{lang_code}")
+        markup.add(btn)
+    
+    return markup
+
+def create_main_menu(user_id):
+    """Создает главное меню с кнопками на нужном языке"""
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    lang = get_user_language(user_id)
+    
+    btn1 = types.InlineKeyboardButton(menu_buttons['about'][lang], callback_data="about")
+    btn2 = types.InlineKeyboardButton(menu_buttons['skills'][lang], callback_data="skills")
+    btn3 = types.InlineKeyboardButton(menu_buttons['projects'][lang], callback_data="projects")
+    btn4 = types.InlineKeyboardButton(menu_buttons['contact'][lang], callback_data="contact")
+    btn5 = types.InlineKeyboardButton(menu_buttons['languages'][lang], callback_data="languages")
+    btn6 = types.InlineKeyboardButton(menu_buttons['interests'][lang], callback_data="interests")
+    btn7 = types.InlineKeyboardButton(menu_buttons['personal_info'][lang], callback_data="personal_info")
+    
+    markup.add(btn1, btn2)
+    markup.add(btn3, btn4)
+    markup.add(btn5, btn6)
+    markup.add(btn7)
+    
+    # Добавляем кнопку смены языка
+    lang_btn = types.InlineKeyboardButton(t('change_lang', user_id), callback_data="change_lang")
+    markup.add(lang_btn)
+    
+    return markup
+
+def create_back_menu(user_id):
+    """Создает кнопку Назад на нужном языке"""
+    markup = types.InlineKeyboardMarkup()
+    back_btn = types.InlineKeyboardButton(t('back_to_menu', user_id), callback_data="menu")
+    markup.add(back_btn)
+    return markup
+
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    """Команда /start"""
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name or "Friend"
+    
+    # Если язык не установлен, показываем выбор языка
+    if user_id not in user_languages:
+        text = translations['language_select']['en']
+        markup = create_language_menu()
+        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+    else:
+        # Показываем главное меню на выбранном языке
+        text = t('welcome', user_id, name=user_name)
+        markup = create_main_menu(user_id)
+        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+
+@bot.message_handler(commands=['help'])
+def help_command(message):
+    """Команда /help"""
+    user_id = message.from_user.id
+    text = t('help_text', user_id)
+    bot.send_message(message.chat.id, text, parse_mode='Markdown')
+
+@bot.message_handler(commands=['lang'])
+def lang_command(message):
+    """Команда смены языка"""
+    text = translations['language_select']['en']
+    markup = create_language_menu()
+    bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    """Обработчик нажатий на кнопки"""
+    user_id = call.from_user.id
+    
+    # Обработка выбора языка
+    if call.data.startswith('lang_'):
+        lang_code = call.data.replace('lang_', '')
+        if lang_code in LANGUAGES:
+            set_user_language(user_id, lang_code)
+            
+            # Подтверждение смены языка
+            confirmation_text = t('language_changed', user_id)
+            bot.edit_message_text(confirmation_text, call.message.chat.id, call.message.message_id, parse_mode='Markdown')
+            
+            # Показываем главное меню
+            user_name = call.from_user.first_name or "Friend"
+            text = t('welcome', user_id, name=user_name)
+            markup = create_main_menu(user_id)
+            bot.send_message(call.message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+    
+    # Смена языка из главного меню
+    elif call.data == "change_lang":
+        text = translations['language_select']['en']
+        markup = create_language_menu()
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup, parse_mode='Markdown')
+    
+    # Возврат в главное меню
+    elif call.data == "menu":
+        user_name = call.from_user.first_name or "Friend"
+        text = t('welcome', user_id, name=user_name)
+        markup = create_main_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    # Обработка основных разделов
+    elif call.data == "about":
+        text = t('about_me', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "skills":
+        text = t('skills', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "projects":
+        text = t('projects', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "contact":
+        text = t('contact', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "languages":
+        text = t('languages', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    elif call.data == "interests":
+        text = t('interests', user_id)
+        markup = create_back_menu(user_id)
+        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                             reply_markup=markup, parse_mode='Markdown')
+    
+    # Секретный раздел
+    elif call.data == "personal_info":
+        # Инициализируем попытки пользователя
+        if user_id not in user_password_attempts:
+            user_password_attempts[user_id] = 3
+        
+        if user_password_attempts[user_id] <= 0:
+            text = t('access_blocked', user_id)
+            markup = create_back_menu(user_id)
+            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                                 reply_markup=markup, parse_mode='Markdown')
+        else:
+            text = t('password_prompt', user_id)
+            markup = create_back_menu(user_id)
+            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
+                                 reply_markup=markup, parse_mode='Markdown')
+            
+            # Устанавливаем состояние ожидания пароля
+            user_languages[user_id + 1000000] = 'waiting_password'
+
+    # Подтверждение обработки callback
+    bot.answer_callback_query(call.id)
+
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    """Обработчик всех остальных сообщений"""
+    user_id = message.from_user.id
+    
+    # Проверяем, ждем ли мы пароль от пользователя
+    if user_languages.get(user_id + 1000000) == 'waiting_password':
+        user_languages.pop(user_id + 1000000, None)  # Убираем состояние
+        
+        if message.text == SECRET_PASSWORD:
+            # Правильный пароль!
+            text = t('personal_info_content', user_id)
+            markup = create_back_menu(user_id)
+            bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+            
+            # Сбрасываем попытки
+            user_password_attempts[user_id] = 3
+        else:
+            # Неправильный пароль
+            user_password_attempts[user_id] -= 1
+            attempts_left = user_password_attempts[user_id]
+            
+            if attempts_left > 0:
+                text = t('wrong_password', user_id, attempts=attempts_left)
+                markup = create_back_menu(user_id)
+                bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+            else:
+                text = t('access_blocked', user_id)
+                markup = create_back_menu(user_id)
+                bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
+        return
+    
+    # Обычная обработка сообщений
+    text = t('message_reply', user_id)
+    bot.send_message(message.chat.id, text, parse_mode='Markdown')
+
+if __name__ == "__main__":
+    try:
+        # Запускаем HTTP сервер в отдельном потоке
+        http_thread = Thread(target=keep_alive)
+        http_thread.daemon = True
+        http_thread.start()
+        
+        # Запускаем Telegram бота
+        logger.info("🤖 Multilingual Bot is starting...")
+        logger.info("🌐 Supported languages: English, Русский")
+        logger.info("🚀 Bot is now ready to receive users!")
+        
+        bot.polling(none_stop=True)
+    except Exception as e:
+        logger.error(f"Error: {e}")
     
     'language_select': {
         'en': '🌐 **Select your language / Выберите язык:**',
@@ -725,323 +1032,3 @@ Want to see live demos? Contact me! 📧""",
 
 ---
 *Вот какой я на самом деле, когда не изображаю профессионала! Спасибо что познакомились с настоящим Жасуром! 🚀*'''
-    },
-    
-    'password_prompt': {
-        'en': '🔐 **Access to Personal Information**\n\nThis section contains private details about my real personality, hobbies, and personal life beyond the professional side.\n\n🔑 **Please enter the access code to continue:**\n\n💡 *Hint: Special combination from my personal life*',
-        'ru': '🔐 **Доступ к личной информации**\n\nЭтот раздел содержит личные детали о моей настоящей личности, хобби и личной жизни за пределами профессиональной стороны.\n\n🔑 **Пожалуйста, введите код доступа для продолжения:**\n\n💡 *Подсказка: Особая комбинация из моей личной жизни*'
-    },
-    
-    'wrong_password': {
-        'en': '❌ **Access Denied**\n\n🚫 Incorrect access code. Please try again.\n\n💡 *Hint: Think about something very personal to me*\n\n🔄 **Attempts remaining: {attempts}**',
-        'ru': '❌ **Доступ запрещен**\n\n🚫 Неверный код доступа. Попробуйте еще раз.\n\n💡 *Подсказка: Подумайте о чем-то очень личном для меня*\n\n🔄 **Осталось попыток: {attempts}**'
-    },
-    
-    'access_blocked': {
-        'en': '🚨 **Access Temporarily Blocked**\n\n⏰ Too many incorrect attempts. Access to personal information is temporarily restricted.\n\n🔄 **Try again later or contact me directly.**',
-        'ru': '🚨 **Доступ временно заблокирован**\n\n⏰ Слишком много неверных попыток. Доступ к личной информации временно ограничен.\n\n🔄 **Попробуйте позже или свяжитесь со мной напрямую.**'
-    },
-    
-    'message_reply': {
-        'en': """Thanks for the message! 😊
-
-I'm a 15-year-old developer from Central Asia who loves creating amazing digital experiences!
-
-Use /start to see the main menu with all my information, or just keep chatting - I love talking about tech, projects, or literally anything! 🚀
-
-What would you like to know about me?""",
-        'ru': """Спасибо за сообщение! 😊
-
-Я 15-летний разработчик из Центральной Азии, который любит создавать удивительные цифровые решения!
-
-Используйте /start чтобы увидеть главное меню со всей информацией обо мне, или просто продолжайте общаться - я люблю говорить о технологиях, проектах или буквально о чём угодно! 🚀
-
-Что вы хотели бы узнать обо мне?"""
-    },
-    
-    'back_to_menu': {
-        'en': '🔙 Back to Menu',
-        'ru': '🔙 Назад в меню'
-    },
-    
-    'change_lang': {
-        'en': '🌐 Change Language',
-        'ru': '🌐 Изменить язык'
-    }
-}
-
-# Кнопки меню
-menu_buttons = {
-    'about': {
-        'en': '👤 About Me',
-        'ru': '👤 Обо мне'
-    },
-    'skills': {
-        'en': '💻 Skills',
-        'ru': '💻 Навыки'
-    },
-    'projects': {
-        'en': '🚀 Projects',
-        'ru': '🚀 Проекты'
-    },
-    'contact': {
-        'en': '📧 Contact',
-        'ru': '📧 Контакты'
-    },
-    'languages': {
-        'en': '🌍 Languages',
-        'ru': '🌍 Языки'
-    },
-    'interests': {
-        'en': '🎯 Interests',
-        'ru': '🎯 Интересы'
-    },
-    'personal_info': {
-        'en': '🔒 Personal Information',
-        'ru': '🔒 Личная информация'
-    }
-}
-
-def get_user_language(user_id):
-    """Получить язык пользователя"""
-    return user_languages.get(user_id, 'en')
-
-def set_user_language(user_id, lang):
-    """Установить язык пользователя"""
-    user_languages[user_id] = lang
-
-def t(key, user_id, **kwargs):
-    """Получить перевод для пользователя"""
-    lang = get_user_language(user_id)
-    text = translations.get(key, {}).get(lang, translations.get(key, {}).get('en', key))
-    return text.format(**kwargs)
-
-def create_language_menu():
-    """Создает меню выбора языка"""
-    markup = types.InlineKeyboardMarkup(row_width=1)
-    
-    for lang_code, lang_name in LANGUAGES.items():
-        btn = types.InlineKeyboardButton(lang_name, callback_data=f"lang_{lang_code}")
-        markup.add(btn)
-    
-    return markup
-
-def create_main_menu(user_id):
-    """Создает главное меню с кнопками на нужном языке"""
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    lang = get_user_language(user_id)
-    
-    btn1 = types.InlineKeyboardButton(menu_buttons['about'][lang], callback_data="about")
-    btn2 = types.InlineKeyboardButton(menu_buttons['skills'][lang], callback_data="skills")
-    btn3 = types.InlineKeyboardButton(menu_buttons['projects'][lang], callback_data="projects")
-    btn4 = types.InlineKeyboardButton(menu_buttons['contact'][lang], callback_data="contact")
-    btn5 = types.InlineKeyboardButton(menu_buttons['languages'][lang], callback_data="languages")
-    btn6 = types.InlineKeyboardButton(menu_buttons['interests'][lang], callback_data="interests")
-    btn7 = types.InlineKeyboardButton(menu_buttons['personal_info'][lang], callback_data="personal_info")
-    
-    markup.add(btn1, btn2)
-    markup.add(btn3, btn4)
-    markup.add(btn5, btn6)
-    markup.add(btn7)
-    
-    # Добавляем кнопку смены языка
-    lang_btn = types.InlineKeyboardButton(t('change_lang', user_id), callback_data="change_lang")
-    markup.add(lang_btn)
-    
-    return markup
-
-def create_back_menu(user_id):
-    """Создает кнопку Назад на нужном языке"""
-    markup = types.InlineKeyboardMarkup()
-    back_btn = types.InlineKeyboardButton(t('back_to_menu', user_id), callback_data="menu")
-    markup.add(back_btn)
-    return markup
-
-@bot.message_handler(commands=['start'])
-def start_command(message):
-    """Команда /start"""
-    user_id = message.from_user.id
-    user_name = message.from_user.first_name or "Friend"
-    
-    # Если язык не установлен, показываем выбор языка
-    if user_id not in user_languages:
-        text = translations['language_select']['en']
-        markup = create_language_menu()
-        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-    else:
-        # Показываем главное меню на выбранном языке
-        text = t('welcome', user_id, name=user_name)
-        markup = create_main_menu(user_id)
-        bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-
-@bot.message_handler(commands=['help'])
-def help_command(message):
-    """Команда /help"""
-    user_id = message.from_user.id
-    text = t('help_text', user_id)
-    bot.send_message(message.chat.id, text, parse_mode='Markdown')
-
-@bot.message_handler(commands=['lang'])
-def lang_command(message):
-    """Команда смены языка"""
-    text = translations['language_select']['en']
-    markup = create_language_menu()
-    bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-
-@bot.callback_query_handler(func=lambda call: True)
-def callback_handler(call):
-    """Обработчик нажатий на кнопки"""
-    user_id = call.from_user.id
-    
-    # Обработка выбора языка
-    if call.data.startswith('lang_'):
-        lang_code = call.data.replace('lang_', '')
-        if lang_code in LANGUAGES:
-            set_user_language(user_id, lang_code)
-            
-            # Подтверждение смены языка
-            confirmation_text = t('language_changed', user_id)
-            bot.edit_message_text(confirmation_text, call.message.chat.id, call.message.message_id, parse_mode='Markdown')
-            
-            # Показываем главное меню
-            user_name = call.from_user.first_name or "Friend"
-            text = t('welcome', user_id, name=user_name)
-            markup = create_main_menu(user_id)
-            bot.send_message(call.message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-    
-    # Смена языка из главного меню
-    elif call.data == "change_lang":
-        text = translations['language_select']['en']
-        markup = create_language_menu()
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, reply_markup=markup, parse_mode='Markdown')
-    
-    # Возврат в главное меню
-    elif call.data == "menu":
-        user_name = call.from_user.first_name or "Friend"
-        text = t('welcome', user_id, name=user_name)
-        markup = create_main_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    
-    # Секретный раздел
-    elif call.data == "personal_info":
-        # Инициализируем попытки пользователя
-        if user_id not in user_password_attempts:
-            user_password_attempts[user_id] = 3
-        
-        if user_password_attempts[user_id] <= 0:
-            text = t('access_blocked', user_id)
-            markup = create_back_menu(user_id)
-            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                                 reply_markup=markup, parse_mode='Markdown')
-        else:
-            text = t('password_prompt', user_id)
-            markup = create_back_menu(user_id)
-            bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                                 reply_markup=markup, parse_mode='Markdown')
-            
-            # Устанавливаем состояние ожидания пароля
-            user_languages[user_id + 1000000] = 'waiting_password'
-    
-    # Обработка основных разделов
-    elif call.data == "about":
-        text = t('about_me', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    
-    elif call.data == "skills":
-        text = t('skills', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    
-    elif call.data == "projects":
-        text = t('projects', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    
-    elif call.data == "contact":
-        text = t('contact', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-
-elif call.data == "interests":
-        text = t('interests', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    
-elif call.data == "personal_info":
-    if user_id not in user_password_attempts:
-        user_password_attempts[user_id] = 3
-    
-    if user_password_attempts[user_id] <= 0:
-        text = t('access_blocked', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-    else:
-        text = t('password_prompt', user_id)
-        markup = create_back_menu(user_id)
-        bot.edit_message_text(text, call.message.chat.id, call.message.message_id, 
-                             reply_markup=markup, parse_mode='Markdown')
-        
-        user_languages[user_id + 1000000] = 'waiting_password'
-
-    # Подтверждение обработки callback
-    bot.answer_callback_query(call.id)
-
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    """Обработчик всех остальных сообщений"""
-    user_id = message.from_user.id
-    
-    # Проверяем, ждем ли мы пароль от пользователя
-    if user_languages.get(user_id + 1000000) == 'waiting_password':
-        user_languages.pop(user_id + 1000000, None)  # Убираем состояние
-        
-        if message.text == SECRET_PASSWORD:
-            # Правильный пароль!
-            text = t('personal_info_content', user_id)
-            markup = create_back_menu(user_id)
-            bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-            
-            # Сбрасываем попытки
-            user_password_attempts[user_id] = 3
-        else:
-            # Неправильный пароль
-            user_password_attempts[user_id] -= 1
-            attempts_left = user_password_attempts[user_id]
-            
-            if attempts_left > 0:
-                text = t('wrong_password', user_id, attempts=attempts_left)
-                markup = create_back_menu(user_id)
-                bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-            else:
-                text = t('access_blocked', user_id)
-                markup = create_back_menu(user_id)
-                bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode='Markdown')
-        return
-    
-    # Обычная обработка сообщений
-    text = t('message_reply', user_id)
-    bot.send_message(message.chat.id, text, parse_mode='Markdown')
-
-if __name__ == "__main__":
-    try:
-        # Запускаем HTTP сервер в отдельном потоке
-        http_thread = Thread(target=keep_alive)
-        http_thread.daemon = True
-        http_thread.start()
-        
-        # Запускаем Telegram бота
-        logger.info("🤖 Multilingual Bot is starting...")
-        logger.info("🌐 Supported languages: English, Русский")
-        logger.info("🚀 Bot is now ready to receive users!")
-        
-        bot.polling(none_stop=True)
-    except Exception as e:
-        logger.error(f"Error: {e}")
