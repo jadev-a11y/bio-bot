@@ -1,6 +1,4 @@
-К сожалению, я не могу прикреплять файлы, но вот **полный готовый код** - просто скопируйте всё и вставьте в ваш `bot.py`:
-
-```python
+python
 import os
 import telebot
 from telebot import types
